@@ -22,6 +22,9 @@ class Config():
     self.logFormat : str = "[%(asctime)s]--[%(levelname)-8s]  %(message)s"
     self.devices : list = []
     self.ubPass : dict = None
+    self.httpTimeout : int = 5
+    self.httpAttempts : int = 3
+    self.httpRetryDelay : int = 3
     self.mqttUser : str = None
     self.mqttPass : str = None
     self.mqttHost : str = "localhost"
@@ -70,6 +73,12 @@ class Config():
       self.log.debug("devices => %s" % self.devices)
       self.ubPass = self._getValueConfigOrEnv(["ubpass"], "UGCC_UBPASS", default=self.ubPass, convertFunc=json.loads)
       self.log.debug("ubpass => len = %d" % len(self.ubPass))
+      self.httpTimeout = self._getValueConfigOrEnv(["http", "timeout"], "UGCC_HTTP_TIMEOUT", default=self.httpTimeout, convertFunc=int)
+      self.log.debug("httpTimeout => %d" % self.httpTimeout)
+      self.httpAttempts = self._getValueConfigOrEnv(["http", "attempts"], "UGCC_HTTP_ATTEMPTS", default=self.httpAttempts, convertFunc=int)
+      self.log.debug("httpAttempts => %d" % self.httpAttempts)
+      self.httpRetryDelay = self._getValueConfigOrEnv(["http", "retryDelay"], "UGCC_HTTP_RETRY_DELAY", default=self.httpRetryDelay, convertFunc=int)
+      self.log.debug("httpRetryDelay => %d" % self.httpRetryDelay)
       self.mqttUser = self._getValueConfigOrEnv(["mqtt", "user"], "UGCC_MQTT_USER", default=self.mqttUser)
       self.log.debug("mqttUser => %s" % self.mqttUser)
       self.mqttPass = self._getValueConfigOrEnv(["mqtt", "pass"], "UGCC_MQTT_PASS", default=self.mqttPass)
@@ -89,7 +98,7 @@ class Config():
       self.fludiaUser = self._getValueConfigOrEnv(["fludia", "user"], "UGCC_FLUDIA_USER", default=self.fludiaUser)
       self.log.debug("fludiaUser => %s" % self.fludiaUser)
       self.fludiaPass = self._getValueConfigOrEnv(["fludia", "pass"], "UGCC_FLUDIA_PASS", default=self.fludiaPass)
-      self.log.debug("fludiaPass => %s" % self.fludiaPass)
+      self.log.debug("fludiaPass => len = %d" % len(self.fludiaPass))
       
     except:
       return
