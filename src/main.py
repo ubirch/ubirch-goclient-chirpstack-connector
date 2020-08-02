@@ -7,13 +7,14 @@ import config
 import mqttReceiver
 import devices
 import messageProcessor
+import httpSend
 import goClientConnector
 import fludiaAPIConnector
+import realtoConnector
 
 
 # get the config and log file path
-CONFIGFILE = os.getenv("CONFIG_FILE", "../config.json")
-CONFIG_FLAG = "--config"
+CONFIGFILE = os.getenv("UGCC_CONFIG_FILE", "../config.json")
 
 
 class Main():
@@ -57,17 +58,34 @@ class Main():
     # initialise the message processor
     self.messageProcessor = messageProcessor.MessageProcessor(self.devices, self.log)
 
+    # initalise the http class
+    self.http = httpSend.HttpSend(
+      self.config.httpTimeout, self.config.httpAttempts, self.config.httpRetryDelay, self.log
+    )
+
     # initialise the go-client connector
     self.goClientConnector = goClientConnector.GoClientConnector(
-      self.config.goClientUrl, self.devices, self.log
+      self.config.goClientUrl, self.devices, self.http, self.log
     )
 
     # initialise the fludia api connector
     self.fludiaApiConnector = fludiaAPIConnector.FludiaAPIConnector(
-      self.config.fludiaUrl, self.config.fludiaUser, self.config.fludiaPass, self.devices, self.log
+      self.config.fludiaUrl, self.config.fludiaUser, self.config.fludiaPass, self.http, self.log
     )
 
-    # initialise the MQTTReceiver
+    # initalise the realto api connector
+    self.realtoApiConnector = realtoConnector.RealtoConnector(
+      self.config.realToUrl, self.config.realToSubKey, self.http, self.log
+    )
+
+    # create a array of endpoints
+    self.endpoints = [
+      ["uBirch go-client", self.goClientConnector.sendData],
+      ["Fludia API", self.fludiaApiConnector.sendData],
+      ["re.alto API", self.realtoApiConnector.sendData]
+    ]
+
+    # initialise the MQTTReceiver (BLOCKING)
     self.mqttReceiver = mqttReceiver.MQTTReceiver(
       self.config.mqttHost, self.config.mqttPort, self.config.mqttUser,
       self.config.mqttPass, self.messageCB, self.log
@@ -92,29 +110,24 @@ class Main():
         return
 
       if not datapkt:
-        self.log.error
-
-      self.log.debug("Finished data packet: '%s'" % str(datapkt))
-
-      # try to send it to the go client
-      self.log.debug("Trying to send the measurement to the go-client ...")
-
-      try:
-        self.goClientConnector.sendData(datapkt)
-      except Exception as e:
-        self.log.error("Error sending a measurement to the go-client!")
-        self.log.exception(e)
+        self.log.error("Error creating a data packet out of a message!")
 
         return
 
-      # try to send it to the fludia-api
-      self.log.debug("Trying to send the measurement to the Fludia API")
+      self.log.debug("Finished data packet: '%s'" % str(datapkt))
 
       try:
-        self.fludiaApiConnector.sendData(datapkt)
+        # try to send it to all the endpoints
+        for endpoint in self.endpoints:
+          self.log.debug("Trying to send the measurement to the %s" % endpoint[0])
+
+          try:
+            endpoint[1](datapkt)
+          except Exception as e:
+            self.log.error("Error sending a measurement to the %s!" % endpoint[0])
+            self.log.exception(e)
       except Exception as e:
-        self.log.error("Error sending a measurement to the Fludia API!")
-        self.log.exception(e)
+        return
     else:
       # ignore the message
       return
