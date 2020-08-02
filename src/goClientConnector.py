@@ -3,13 +3,15 @@ import requests
 import json
 
 import devices
+import httpSend
 
 
 class GoClientConnector():
-  def __init__(self, url : str, devices : devices.Devices, log : logging.Logger):
+  def __init__(self, url : str, devices : devices.Devices, http : httpSend.HttpSend, log : logging.Logger):
     """ init function of the GoClientConnector function """
     self.url = url
     self.devices = devices
+    self.http = http
     self.log = log
 
     self.log.info("The go-client URL is '%s'" % self.url)
@@ -31,19 +33,19 @@ class GoClientConnector():
 
       return
 
-    # send the measurement
-    self.log.info("Sending a measurement to %s" % (self.url + device.uuid))
-
-    r = requests.post(
-      self.url + device.uuid,
-      headers={"X-Auth-Token": device.passwd, "Content-Type": "application/json"},
-      data=json.dumps(data)
+    status, reason = self.http.httpSend(
+      self.url + device.uuid, 
+      {"X-Auth-Token": device.passwd, "Content-Type": "application/json"},
+      json.dumps(data)
     )
 
     # check for success
-    if r.status_code == requests.codes.OK:
-      self.log.debug("Successfully sent the measurement to the go-client")
+    if status == requests.codes.OK:
+      self.log.debug("Successfully sent the measurement to the Go-Client")
     else:
-      self.log.error("Error sending the measurement to the go-client (%d/%s)" % (r.status_code, r.reason))
+      if status == -1:
+        self.log.error("Error sending the measurement to the Go-Client")
+      else:
+        self.log.error("Error sending the measurement to the Go-Client (%d/%s)" % (status, reason))
 
     return
