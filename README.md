@@ -1,5 +1,5 @@
 # ubirch-goclient-chirpstack-connector
-The main function of the uBirch-GoClient-Chirpstack-Connector is forwarding data extracted out LoRa messages published via. MQTT by ChirpStack to the uBirch-GoClient, but it also handles forwarding this data to other endpoints, namely [Fludia](https://fludia.com/?lang=en) and [re.alto](https://realto.io/).
+The main function of the uBirch-GoClient-Chirpstack-Connector is forwarding data extracted out of LoRa messages published via. MQTT by ChirpStack to the uBirch-GoClient, but it also handles forwarding this data to other endpoints, namely [Fludia](https://fludia.com/?lang=en) and [re.alto](https://realto.io/).
 
 ## Run it
 ```
