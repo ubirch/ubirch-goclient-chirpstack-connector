@@ -12,6 +12,12 @@ def setupLog(config : config.Config = None, default_logfile : str ="/dev/stdout"
   loglevel = 10
   logformat = "[%(asctime)s]--[%(levelname)-8s]  %(message)s"
 
+  # opening /dev/stdout with a will cause errors on some platforms
+  if default_logfile == "/dev/stdout":
+    mode = "w"
+  else:
+    mode = "a"
+
   if not initialLogger:
     # reaload the logging module to configure it with the actual configuration
     logging.shutdown()
@@ -29,8 +35,7 @@ def setupLog(config : config.Config = None, default_logfile : str ="/dev/stdout"
     
   # open a file handler
   try:
-
-    fh = logging.FileHandler(logfile)
+    fh = logging.FileHandler(logfile, mode=mode)
   except Exception as e:
     logging.error("Error opening logfile '%s'!" % logfile)
     logging.exception(e)
