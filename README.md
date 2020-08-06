@@ -237,3 +237,41 @@ Example:
 
   "password123"
 ```
+
+### Data package structure
+
+The generated data package is in json format and has the following form and fields:
+```
+{
+    "device_properties":{
+        "deveui":"70b3d54a00000aac"
+    },
+    "meterId":"SomeID",
+    "payload_cleartext":"46000007000000000000",
+    "r_diff-10":0,
+    "r_diff-15":0,
+    "r_diff-5":0,
+    "reading":93,
+    "timestamp":"2020-08-06T12:44:02.083157+02:00",
+    "type":"uplink"
+}
+```
+### Verification
+To verify the data, got to [ubirch colsole](https://console.prod.ubirch.com/verification/json) and enter the base64 encoded hash of the data.
+
+#### Create hash for verification
+To create a hash for verification, you can use the following python script:
+```
+>>> import json, hashlib, base64
+>>> msgjson = {"device_properties":{"deveui":"70b3d54a00000aac"},"meterId":"SomeID","payload_cleartext":"46000007000000000000","r_diff-10":0,"r_diff-15":0,"r_diff-5":0,"reading":93,"timestamp":"2020-08-06T12:44:02.083157+02:00","type":"uplink"}
+>>> msgstr = json.dumps(msgjson, sort_keys=True, indent=None, separators=(",", ":"))
+>>> hash = hashlib.sha256(bytes(msgstr, "utf8"))
+>>> base64.b64encode(hash.digest())
+b'irjr79EU//D3ex0SZI+r9G8chBiEPefk62u+DCzOLlE='
+>>> 
+```
+Now copy the output from the last line (e.g: `irjr79EU//D3ex0SZI+r9G8chBiEPefk62u+DCzOLlE=`) and paste it to the verification field.
+If you do not have an account at ubirch, set one up, or use curl:
+```
+curl -d 'juujpm23LNbltrKqRtRH+0V9pMnbZ2HABGUNgFrM/KY=' https://verify.demo.ubirch.com/api/upp/verify
+```
