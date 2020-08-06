@@ -41,7 +41,7 @@ class HttpSend():
           url, attemptsLeft, self.retryDelay
         ))
 
-        time.sleep(self.httpRetryDelay)
+        time.sleep(self.retryDelay)
       else:
         self.log.error("Finally failed send data to %s!" % url)
 
