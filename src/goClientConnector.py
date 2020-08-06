@@ -41,7 +41,7 @@ class GoClientConnector():
 
     # check for success
     if status == requests.codes.OK:
-      self.log.debug("Successfully sent the measurement to the Go-Client")
+      self.log.info("Successfully sent the measurement to the Go-Client")
     else:
       if status == -1:
         self.log.error("Error sending the measurement to the Go-Client")

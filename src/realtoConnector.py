@@ -29,7 +29,7 @@ class RealtoConnector():
 
     # check for success
     if status == requests.codes.OK:
-      self.log.debug("Successfully sent the measurement to the re.alto API")
+      self.log.info("Successfully sent the measurement to the re.alto API")
     else:
       if status == -1:
         self.log.error("Error sending the measurement to the re.alto API")

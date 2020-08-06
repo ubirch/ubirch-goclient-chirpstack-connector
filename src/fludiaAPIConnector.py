@@ -34,7 +34,7 @@ class FludiaAPIConnector():
 
     # check for success
     if status == requests.codes.OK:
-      self.log.debug("Successfully sent the measurement to the Fludia API")
+      self.log.info("Successfully sent the measurement to the Fludia API")
     else:
       if status == -1:
         self.log.error("Error sending the measurement to the Fludia API")
