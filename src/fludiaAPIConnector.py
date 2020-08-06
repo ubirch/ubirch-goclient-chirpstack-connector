@@ -28,9 +28,9 @@ class FludiaAPIConnector():
 
     self.log.info("The Fludia API URL is '%s'" % self.url)
 
-  def sendData(self, data : dict):
+  def sendData(self, data : str):
     """ this function sends measurements to the fludia api """
-    status, reason = self.http.httpSend(self.url, self.headers, json.dumps(data))
+    status, reason = self.http.httpSend(self.url, self.headers, data)
 
     # check for success
     if status == requests.codes.OK:

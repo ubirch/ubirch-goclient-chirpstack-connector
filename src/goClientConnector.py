@@ -16,9 +16,9 @@ class GoClientConnector():
 
     self.log.info("The go-client URL is '%s'" % self.url)
 
-  def sendData(self, data : dict):
+  def sendData(self, data : str):
     """ this function sends measurements to the go client """
-    eui = data.get("device_properties").get("deveui")
+    eui = json.loads(data).get("device_properties").get("deveui")
 
     # get the device
     device = self.devices.getDeviceByEUI(eui)
@@ -36,7 +36,7 @@ class GoClientConnector():
     status, reason = self.http.httpSend(
       self.url + device.uuid, 
       {"X-Auth-Token": device.passwd, "Content-Type": "application/json"},
-      json.dumps(data)
+      data
     )
 
     # check for success

@@ -1,6 +1,7 @@
 import os
 import sys
 import logging
+import json
 
 import log
 import config
@@ -114,7 +115,10 @@ class Main():
 
         return
 
-      self.log.debug("Finished data packet: '%s'" % str(datapkt))
+      # sort the json object and string-ify it
+      data = json.dumps(datapkt, sort_keys=True, indent=None, separators=(",", ":"))
+
+      self.log.debug("Finished data packet: '%s'" % data)
 
       try:
         # try to send it to all the endpoints
@@ -122,7 +126,7 @@ class Main():
           self.log.debug("Trying to send the measurement to the %s" % endpoint[0])
 
           try:
-            endpoint[1](datapkt)
+            endpoint[1](data)
           except Exception as e:
             self.log.error("Error sending a measurement to the %s!" % endpoint[0])
             self.log.exception(e)
