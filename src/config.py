@@ -112,7 +112,7 @@ class Config():
     val = self._getValueFromDict(keyPath, self.config)
 
     # if it is not in the config file, try env (or set the default)
-    if not val:
+    if val == None:
       val = os.getenv(envName, default)
 
       # check if this value should be converted before returning
@@ -127,7 +127,7 @@ class Config():
           raise()
 
     # check if the value is still undefined
-    if not val:
+    if val == None:
       valName = "config"
 
       for namePart in keyPath:
