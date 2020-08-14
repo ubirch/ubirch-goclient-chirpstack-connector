@@ -122,28 +122,34 @@ class MessageProcessor():
     # there are four valid data lens
     dataLen = len(dataBytes)
 
-    if 4 <= dataLen <= 10:
-      # totalWh is a three byte integer
-      totalRot = dataBytes[1] << 16 | dataBytes[2] << 8 | dataBytes[3]
+    try:
+      if 4 <= dataLen <= 10:
+        # totalWh is a three byte integer
+        totalRot = dataBytes[1] << 16 | dataBytes[2] << 8 | dataBytes[3]
 
-      if dataLen > 4:
-        # lastDiff1 is a two byte integer
-        lastDiff1 = dataBytes[4] << 8 | dataBytes[5]
+        if dataLen > 4:
+          # lastDiff1 is a two byte integer
+          lastDiff1 = dataBytes[4] << 8 | dataBytes[5]
 
-        if dataLen > 6:
-          # lastDiff2 is a two byte integer
-          lastDiff2 = lastDiff1
-          lastDiff1 = dataBytes[6] << 8 | dataBytes[7]
-
-          if dataLen > 8:
-            # lastDiff3 is a two byte integer
-            lastDiff3 = lastDiff2
+          if dataLen > 6:
+            # lastDiff2 is a two byte integer
             lastDiff2 = lastDiff1
-            lastDiff1 = dataBytes[8] << 8 | dataBytes[9] 
-    else:
-      self.log.error("Error invalid application data length: '%d'" % dataLen)
-      
-      return None
+            lastDiff1 = dataBytes[6] << 8 | dataBytes[7]
+
+            if dataLen > 8:
+              # lastDiff3 is a two byte integer
+              lastDiff3 = lastDiff2
+              lastDiff2 = lastDiff1
+              lastDiff1 = dataBytes[8] << 8 | dataBytes[9] 
+      else:
+        self.log.error("Error invalid application data length: '%d'" % dataLen)
+        
+        return None
+    except IndexError as e:
+        self.log.error("Error invalid application data length: '%d'" % dataLen)
+        self.log.exception(e)
+
+        return None
 
     return {
       "rawBytes": "".join(format(x, "02x") for x in dataBytes), 
