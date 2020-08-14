@@ -97,44 +97,72 @@ class Main():
   def messageCB(self, message : mqttReceiver.mqtt.MQTTMessage):
     """ function to be registered as message callback (MQTT) """
 
-    # check if it is a device message
-    if mqttReceiver.mqtt.topic_matches_sub("application/+/device/+/rx", message.topic):
-      # process the message
-      self.log.debug("Trying to process a message from '%s' ..." % message.topic)
+    try:
+      # check if it is a device message
+      if mqttReceiver.mqtt.topic_matches_sub("application/+/device/+/rx", message.topic):
+        # process the message
+        self.log.debug("Trying to process a message from '%s' ..." % message.topic)
 
-      try:
-        datapkt = self.messageProcessor.mkDataPacket(message)
-      except Exception as e:
-        self.log.error("Error creating a data packet out of a message!")
-        self.log.exception(e)
+        # check if the message comes from a known device
+        eui = self.getDevEUIFromTopic(message.topic)
 
+        if not self.devices.getDeviceByEUI(eui):
+          self.log.error("Can not process a message from a device with a unknown EUI: %s" % eui)
+
+          return
+
+        # try to create the data packet
+        try:
+          datapkt = self.messageProcessor.mkDataPacket(message)
+        except Exception as e:
+          self.log.error("Error creating a data packet out of a message!")
+          self.log.exception(e)
+
+          return
+
+        if not datapkt:
+          self.log.error("Error creating a data packet out of a message!")
+
+          return
+
+        # sort the json object and string-ify it
+        data = json.dumps(datapkt, sort_keys=True, indent=None, separators=(",", ":"))
+
+        self.log.debug("Finished data packet: '%s'" % data)
+
+        try:
+          # try to send it to all the endpoints
+          for endpoint in self.endpoints:
+            self.log.debug("Trying to send the measurement to the %s" % endpoint[0])
+
+            try:
+              endpoint[1](data)
+            except Exception as e:
+              self.log.error("Error sending a measurement to the %s!" % endpoint[0])
+              self.log.exception(e)
+        except Exception as e:
+          return
+      else:
+        # ignore the message
         return
+    except Exception as e:
+      self.log.error("Error processing a message on topic %s!" % message.topic)
+      self.log.exception(e)
 
-      if not datapkt:
-        self.log.error("Error creating a data packet out of a message!")
+  def getDevEUIFromTopic(self, topic : str):
+    """ get the device ID from the topic string of a message """
 
-        return
+    #
+    # "application/APPLICATION_NAME/device/DEVICE_ID/rx"
+    #
 
-      # sort the json object and string-ify it
-      data = json.dumps(datapkt, sort_keys=True, indent=None, separators=(",", ":"))
+    topicList = topic.split("/")
 
-      self.log.debug("Finished data packet: '%s'" % data)
-
-      try:
-        # try to send it to all the endpoints
-        for endpoint in self.endpoints:
-          self.log.debug("Trying to send the measurement to the %s" % endpoint[0])
-
-          try:
-            endpoint[1](data)
-          except Exception as e:
-            self.log.error("Error sending a measurement to the %s!" % endpoint[0])
-            self.log.exception(e)
-      except Exception as e:
-        return
+    if len(topicList) != 5:
+      return None
     else:
-      # ignore the message
-      return
+      return topicList[3]
+
 
 # initialise the main class
 if __name__ == "__main__":
