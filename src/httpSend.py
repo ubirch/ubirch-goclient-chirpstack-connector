@@ -13,7 +13,7 @@ class HttpSend():
     self.retryDelay = retryDelay
     self.log = log
 
-  def httpSend(self, url : str, headers : dict, data : object) -> (int, str):
+  def httpSend(self, url : str, headers : dict, data : object) -> (int, str, str):
     """ sends a http request to a given url """
     # set the amount of attempts left
     attemptsLeft = self.attempts
@@ -48,4 +48,4 @@ class HttpSend():
         return (-1, None)
 
     # return the status code and reason sent from the HTTP server
-    return (r.status_code, r.reason)
+    return (r.status_code, r.reason, r.text)

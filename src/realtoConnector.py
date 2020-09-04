@@ -25,7 +25,7 @@ class RealtoConnector():
 
   def sendData(self, data : str):
     """ this function sends measurements to the fludia api """
-    status, reason = self.http.httpSend(self.url, self.headers, data)
+    status, reason, text = self.http.httpSend(self.url, self.headers, data)
 
     # check for success
     if status == requests.codes.OK:
@@ -34,6 +34,6 @@ class RealtoConnector():
       if status == -1:
         self.log.error("Error sending the measurement to the re.alto API")
       else:
-        self.log.error("Error sending the measurement to the re.alto API (%d/%s)" % (status, reason))
+        self.log.error("Error sending the measurement to the re.alto API (%d/%s): %s" % (status, reason, text))
 
     return

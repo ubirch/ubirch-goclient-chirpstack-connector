@@ -33,7 +33,7 @@ class GoClientConnector():
 
       return
 
-    status, reason = self.http.httpSend(
+    status, reason, text = self.http.httpSend(
       self.url + device.uuid, 
       {"X-Auth-Token": device.passwd, "Content-Type": "application/json"},
       data
@@ -46,6 +46,6 @@ class GoClientConnector():
       if status == -1:
         self.log.error("Error sending the measurement to the Go-Client")
       else:
-        self.log.error("Error sending the measurement to the Go-Client (%d/%s)" % (status, reason))
+        self.log.error("Error sending the measurement to the Go-Client (%d/%s): %s" % (status, reason, text))
 
     return

@@ -30,7 +30,7 @@ class FludiaAPIConnector():
 
   def sendData(self, data : str):
     """ this function sends measurements to the fludia api """
-    status, reason = self.http.httpSend(self.url, self.headers, data)
+    status, reason, text = self.http.httpSend(self.url, self.headers, data)
 
     # check for success
     if status == requests.codes.OK:
@@ -39,6 +39,6 @@ class FludiaAPIConnector():
       if status == -1:
         self.log.error("Error sending the measurement to the Fludia API")
       else:
-        self.log.error("Error sending the measurement to the Fludia API (%d/%s)" % (status, reason))
+        self.log.error("Error sending the measurement to the Fludia API (%d/%s): %s" % (status, reason, text))
 
     return
