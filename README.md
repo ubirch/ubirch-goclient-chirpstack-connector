@@ -17,6 +17,16 @@ python src/main.py
 All configuration values can be set via the environment or a configuration file. The default path for the configuration file if the folder above the `src` directory. This can be changed by setting the `UGCC_CONFIG_FILE` environment variable. `UGCC_` (UbirchGoclientChirpstackConnector) is a prefix for all environment variables. All configuration values that have no default value must be set manually.
 
 ### Logging Configuration
+#### 'UGCC_DEFAULT_LOG_FILE'
+```
+Descr:  Sets the log file to be used for post-config logging.
+        The default value is "/dev/stdout".
+Type:   str
+Examples:
+
+  "/dev/stdout"   # Standard Output
+  "/log/ugcc.log"
+```
 #### `log.level` / `UGCC_LOG_LEVEL`
 ```
 Descr:  Sets the log level to be used for the python logging module.

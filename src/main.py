@@ -28,7 +28,7 @@ class Main():
     self.messageProcessor : messageProcessor.MessageProcessor = None
     
     # set up the inital logger (pre-config)
-    self.log = log.setupLog(initialLogger=True, default_logfile="/dev/stdout")
+    self.log = log.setupLog(initialLogger=True)
 
     # check for success
     if not self.log:
@@ -42,7 +42,7 @@ class Main():
       sys.exit(-1)
 
     # load the final logger (post-config)
-    self.log = log.setupLog(self.config, initialLogger=False, default_logfile="/dev/stdout")
+    self.log = log.setupLog(self.config, initialLogger=False)
 
     # check for success
     if not self.log:

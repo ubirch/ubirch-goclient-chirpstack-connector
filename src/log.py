@@ -1,10 +1,12 @@
 import logging
 from importlib import reload
+import os
 
 import config
 
+DEFAULT_LOGFILE = os.getenv("UGCC_DEFAULT_LOG_FILE", "/dev/stdout")
 
-def setupLog(config : config.Config = None, default_logfile : str ="/dev/stdout", initialLogger : bool =False):
+def setupLog(config : config.Config = None, default_logfile : str = DEFAULT_LOGFILE, initialLogger : bool =False):
   """ init function of the Log class """
   log : logging.Logger = None
 
@@ -47,7 +49,8 @@ def setupLog(config : config.Config = None, default_logfile : str ="/dev/stdout"
   fmt = logging.Formatter(logformat)
   fh.setFormatter(fmt)
 
-  # install the file handler
+  # install the file handler and disable the default one
   log.addHandler(fh)
+  log.propagate = False
 
   return log
