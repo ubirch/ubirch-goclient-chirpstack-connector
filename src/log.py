@@ -34,6 +34,9 @@ def setupLog(config : config.Config = None, default_logfile : str = DEFAULT_LOGF
   # initialise the logger
   log = logging.getLogger("mainlog")
   log.setLevel(loglevel)
+
+  # remove all installed handlers
+  log.handlers = []
     
   # open a file handler
   try:
