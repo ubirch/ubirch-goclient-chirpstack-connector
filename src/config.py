@@ -20,6 +20,8 @@ class Config():
     self.logLevel : int = 10
     self.logFile : str = "/dev/stdout"
     self.logFormat : str = "[%(asctime)s]--[%(levelname)-8s]  %(message)s"
+    self.logMaxBytes : int = 2e7
+    self.logBackupCount : int = 10
     self.devices : list = []
     self.ubPass : dict = None
     self.httpTimeout : int = 5
@@ -69,6 +71,10 @@ class Config():
       self.log.debug("logFile => %s" % self.logFile)
       self.logFormat = self._getValueConfigOrEnv(["log", "format"], "UGCC_LOG_FORMAT", self.logFormat)
       self.log.debug("logFormat => %s" % self.logFormat)
+      self.logMaxBytes = self._getValueConfigOrEnv(["log", "maxBytes"], "UGCC_LOG_MAX_BYTES", self.logMaxBytes)
+      self.log.debug("logMaxBytes => %d" % self.logMaxBytes)
+      self.logBackupCount = self._getValueConfigOrEnv(["log", "backupCount"], "UGCC_LOG_BACKUP_COUNT", self.logBackupCount)
+      self.log.debug("logBackupCount => %d" % self.logBackupCount)
       self.devices = self._getValueConfigOrEnv(["devices"], "UGCC_DEVICES", default=self.devices, convertFunc=json.loads)
       self.log.debug("devices => %s" % self.devices)
       self.ubPass = self._getValueConfigOrEnv(["ubpass"], "UGCC_UBPASS", default=self.ubPass, convertFunc=json.loads)
@@ -99,7 +105,6 @@ class Config():
       self.log.debug("fludiaUser => %s" % self.fludiaUser)
       self.fludiaPass = self._getValueConfigOrEnv(["fludia", "pass"], "UGCC_FLUDIA_PASS", default=self.fludiaPass)
       self.log.debug("fludiaPass => len = %d" % len(self.fludiaPass))
-      
     except:
       return
 
@@ -124,7 +129,7 @@ class Config():
           self.log.error("Error type-converting env-loaded value '%s' = '%s' with function '%s'" % (envName, val, convertFunc.__name__))
           self.log.exception(e)
 
-          raise()
+          raise(Exception())
 
     # check if the value is still undefined
     if val == None:
@@ -135,7 +140,7 @@ class Config():
 
       self.log.error("Error value '%s'/'%s' couldn't be loaded from the config file or env and no default was set!" % (valName, envName))
 
-      raise()
+      raise(Exception())
 
     return val
 

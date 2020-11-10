@@ -1,24 +1,19 @@
 import logging
+import logging.handlers
 from importlib import reload
 import os
 
 import config
 
-DEFAULT_LOGFILE = os.getenv("UGCC_DEFAULT_LOG_FILE", "/dev/stdout")
-
-def setupLog(config : config.Config = None, default_logfile : str = DEFAULT_LOGFILE, initialLogger : bool =False):
+def setupLog(config : config.Config = None, initialLogger : bool =False):
   """ init function of the Log class """
   log : logging.Logger = None
 
-  logfile = default_logfile
+  logfile = "/dev/stdout"
   loglevel = 10
   logformat = "[%(asctime)s]--[%(levelname)-8s]  %(message)s"
-
-  # opening /dev/stdout with a will cause errors on some platforms
-  if default_logfile == "/dev/stdout":
-    mode = "w"
-  else:
-    mode = "a"
+  logMaxBytes = 2e7
+  logBackupCount = 10
 
   if not initialLogger:
     # reaload the logging module to configure it with the actual configuration
@@ -30,6 +25,14 @@ def setupLog(config : config.Config = None, default_logfile : str = DEFAULT_LOGF
       logfile = config.logFile
       loglevel = config.logLevel
       logformat = config.logFormat
+      logMaxBytes = config.logMaxBytes
+      logBackupCount = config.logBackupCount
+
+  # opening /dev/stdout with a (append) will cause errors on some platforms (TODO)
+  if logfile == "/dev/stdout":
+    mode = "w"
+  else:
+    mode = "a"
 
   # initialise the logger
   log = logging.getLogger("mainlog")
@@ -40,7 +43,11 @@ def setupLog(config : config.Config = None, default_logfile : str = DEFAULT_LOGF
     
   # open a file handler
   try:
-    fh = logging.FileHandler(logfile, mode=mode)
+    # do not do log rotation when logging to stdout
+    if logfile == "/dev/stdout":
+      fh = logging.FileHandler(logfile, mode=mode)
+    else:
+      fh = logging.handlers.RotatingFileHandler(logfile, mode=mode, maxBytes=logMaxBytes, backupCount=logBackupCount)
   except Exception as e:
     logging.error("Error opening logfile '%s'!" % logfile)
     logging.exception(e)

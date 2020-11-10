@@ -17,6 +17,7 @@ python src/main.py
 All configuration values can be set via the environment or a configuration file. The default path for the configuration file if the folder above the `src` directory. This can be changed by setting the `UGCC_CONFIG_FILE` environment variable. `UGCC_` (UbirchGoclientChirpstackConnector) is a prefix for all environment variables. All configuration values that have no default value must be set manually.
 
 ### Logging Configuration
+Note that before the configuration file is loaded, logs will be written to `"/dev/stdout"`
 #### 'UGCC_DEFAULT_LOG_FILE'
 ```
 Descr:  Sets the log file to be used for post-config logging.
@@ -46,7 +47,7 @@ Values:
 #### `log.file` / `UGCC_LOG_FILE`
 ```
 Descr:  Sets the file to which the log should be written to.
-        The default value is "/dev/stdout".
+        The default value is "/dev/stdout". Note that "/dev/stdout" will disable log rotation.
 Type:   str
 Examples:
 
@@ -64,6 +65,29 @@ Type:   str
 Example:
 
   "[%(asctime)s]--[%(levelname)-8s]  %(message)s"   # -> [2020-08-01 9:19:01,683]--[WARNING]  log message ...
+```
+
+#### `log.maxBytes` / `UGCC_LOG_MAX_BYTES`
+```
+Descr:  Sets the maximum amount of bytes to be logged into a log file before rotating
+Type:   int
+Example:
+
+  20000000  # Rotate after 20mb
+  10000000  # Rotate after 10mb
+  5000000   # Rotate after 5mb
+```
+
+#### `log.backupCount` / `UGCC_LOG_BACKUP_COUNT`
+```
+Descr:  Sets the amount of log files to keep. If a rotation is triggered and this limit was already 
+        reached, the oldest log file will be deleted.
+Type:   int
+Example:
+
+  10  #   Keep ten files
+  5   #   Keep five filed
+  1   #   Keep only one file
 ```
 
 ### Device Configuration
