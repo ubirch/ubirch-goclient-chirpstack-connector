@@ -5,7 +5,7 @@ import os
 
 import config
 
-def setupLog(config : config.Config = None, initialLogger : bool =False):
+def setupLog(config : config.Config = None, initialLogger : bool = False):
   """ init function of the Log class """
   log : logging.Logger = None
 
@@ -28,34 +28,27 @@ def setupLog(config : config.Config = None, initialLogger : bool =False):
       logMaxBytes = config.logMaxBytes
       logBackupCount = config.logBackupCount
 
-  # opening /dev/stdout with a (append) will cause errors on some platforms (TODO)
-  if logfile == "/dev/stdout":
-    mode = "w"
-  else:
-    mode = "a"
-
   # initialise the logger
   log = logging.getLogger("mainlog")
   log.setLevel(loglevel)
 
   # remove all installed handlers
   log.handlers = []
-    
-  # open a file handler
-  try:
-    # do not do log rotation when logging to stdout
-    if logfile == "/dev/stdout":
-      fh = logging.FileHandler(logfile, mode=mode)
-    else:
-      fh = logging.handlers.RotatingFileHandler(logfile, mode=mode, maxBytes=logMaxBytes, backupCount=logBackupCount)
-  except Exception as e:
-    logging.error("Error opening logfile '%s'!" % logfile)
-    logging.exception(e)
 
-    return None
+  # open a file handler if the logfile is not /dev/stdout
+  if logfile != "/dev/stdout":
+    try:
+      # do not do log rotation when logging to stdout
+      fh = logging.handlers.RotatingFileHandler(logfile, maxBytes=logMaxBytes, backupCount=logBackupCount)
+    except Exception as e:
+      logging.error("Error opening logfile '%s'!" % logfile)
+      logging.exception(e)
 
-  # configure the file handler
-  fh.setLevel(loglevel)
+      return None
+  else:
+    fh = logging.StreamHandler()
+
+  # configure the logger
   fmt = logging.Formatter(logformat)
   fh.setFormatter(fmt)
 
