@@ -41,6 +41,8 @@ class Main():
     if not self.config.initSuccess:
       sys.exit(-1)
 
+    self.log.info("Transitioning to the final logger")
+
     # load the final logger (post-config)
     self.log = log.setupLog(self.config, initialLogger=False)
 
@@ -86,11 +88,14 @@ class Main():
       ["re.alto API", self.realtoApiConnector.sendData]
     ]
 
-    # initialise the MQTTReceiver (BLOCKING)
+    # initialise/run the MQTTReceiver (BLOCKING)
     self.mqttReceiver = mqttReceiver.MQTTReceiver(
       self.config.mqttHost, self.config.mqttPort, self.config.mqttUser,
       self.config.mqttPass, self.messageCB, self.log
     )
+
+    # inform aboutthe MQTTReceiver having terminated and exit
+    self.log.info("The MQTTReceiver terminated - Exiting!")
 
     return
 
@@ -153,7 +158,8 @@ class Main():
     """ get the device ID from the topic string of a message """
 
     #
-    # "application/APPLICATION_NAME/device/DEVICE_ID/rx"
+    # The topic-structure of a message:
+    #   "application/APPLICATION_NAME/device/DEVICE_ID/rx"
     #
 
     topicList = topic.split("/")
