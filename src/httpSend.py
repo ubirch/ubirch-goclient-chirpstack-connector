@@ -45,7 +45,7 @@ class HttpSend():
       else:
         self.log.error("Finally failed send data to %s!" % url)
 
-        return (-1, None)
+        return (-1, None, None)
 
     # return the status code and reason sent from the HTTP server
     return (r.status_code, r.reason, r.text)
