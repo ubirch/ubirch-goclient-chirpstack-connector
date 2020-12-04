@@ -4,6 +4,7 @@ import json
 import base64
 
 import httpSend
+import devices
 
 
 class FludiaAPIConnector():
@@ -28,7 +29,7 @@ class FludiaAPIConnector():
 
     self.log.info("The Fludia API URL is '%s'" % self.url)
 
-  def sendData(self, data : str):
+  def sendData(self, data : str, device : devices.Device):
     """ this function sends measurements to the fludia api """
     status, reason, text = self.http.httpSend(self.url, self.headers, data)
 

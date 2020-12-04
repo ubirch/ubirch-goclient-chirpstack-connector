@@ -3,6 +3,7 @@ import requests
 import json
 import base64
 
+import devices
 import httpSend
 
 
@@ -23,9 +24,9 @@ class RealtoConnector():
 
     self.log.info("The re.alto API URL is '%s'" % self.url)
 
-  def sendData(self, data : str):
+  def sendData(self, data : str, device : devices.Device):
     """ this function sends measurements to the fludia api """
-    status, reason, text = self.http.httpSend(self.url, self.headers, data)
+    status, reason, text = self.http.httpSend(self.url + device.uuid, self.headers, data)
 
     # check for success
     if status == requests.codes.OK:

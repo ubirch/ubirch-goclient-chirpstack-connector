@@ -111,7 +111,9 @@ class Main():
         # check if the message comes from a known device
         eui = self.getDevEUIFromTopic(message.topic)
 
-        if not self.devices.getDeviceByEUI(eui):
+        device = self.devices.getDeviceByEUI(eui)
+
+        if not device:
           self.log.error("Can not process a message from a device with a unknown EUI: %s" % eui)
 
           return
@@ -141,7 +143,7 @@ class Main():
             self.log.debug("Trying to send the measurement to the %s" % endpoint[0])
 
             try:
-              endpoint[1](data)
+              endpoint[1](data, device)
             except Exception as e:
               self.log.error("Error sending a measurement to the %s!" % endpoint[0])
               self.log.exception(e)

@@ -16,18 +16,8 @@ class GoClientConnector():
 
     self.log.info("The go-client URL is '%s'" % self.url)
 
-  def sendData(self, data : str):
+  def sendData(self, data : str, device : devices.Device):
     """ this function sends measurements to the go client """
-    eui = json.loads(data).get("device_properties").get("deveui")
-
-    # get the device
-    device = self.devices.getDeviceByEUI(eui)
-    
-    if not device:
-      self.log.error("No device found for EUI '%s'" % eui)
-
-      return
-
     if not device.passwd:
       self.log.error("No password configured for the device with the UUID '%s'" % device.uuid)
 
