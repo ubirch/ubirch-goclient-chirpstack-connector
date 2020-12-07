@@ -28,8 +28,8 @@ class RealtoConnector():
     """ this function sends measurements to the fludia api """
     status, reason, text = self.http.httpSend(self.url + device.uuid, self.headers, data)
 
-    # check for success
-    if status == requests.codes.OK:
+    # check for success (201 is required to be accepted as success)
+    if status == requests.codes.OK or status == 201:
       self.log.info("Successfully sent the measurement to the re.alto API")
     else:
       if status == -1:
