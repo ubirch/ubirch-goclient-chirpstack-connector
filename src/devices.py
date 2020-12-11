@@ -45,7 +45,7 @@ class Devices():
   def getDeviceByEUI(self, eui : str) -> Device:
     """ this function gets a device from self.devices by its eui """
     for device in self.devices:
-      if device.eui == eui:
+      if device.eui.lower() == eui.lower():
         return device
 
     return None
@@ -53,7 +53,7 @@ class Devices():
   def getDeviceByUUID(self, uuid : str) -> Device:
     """ this function gets a device from self.devices by its uuid """
     for device in self.devices:
-      if device.uuid == uuid:
+      if device.uuid.lower() == uuid.lower():
         return device
 
     return None
