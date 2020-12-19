@@ -2,9 +2,6 @@ import requests
 import logging
 import time
 
-import config
-
-
 class HttpSend():
   def __init__(self, timeout : int, attempts : int, retryDelay : int, log : logging.Logger):
     """ the init function of the HTTP class """
