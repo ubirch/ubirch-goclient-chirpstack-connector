@@ -1,3 +1,2 @@
-logging
 paho-mqtt
 requests
