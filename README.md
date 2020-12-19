@@ -3,7 +3,7 @@ The main function of the uBirch-GoClient-Chirpstack-Connector is forwarding data
 
 ## Run it
 ```
-python src/main.py
+python3.8 src/main.py
 ```
 
 ## Requirements
@@ -12,6 +12,8 @@ python src/main.py
 2. A running instance of the [uBirch go-client](https://github.com/ubirch/ubirch-client-go)
 3. Access data for the [Fludia](https://fludia.com/?lang=en) API
 4. Access data for the [re.alto](https://realto.io/) API
+
+* If you are using a RAK7244C gateway to set up the UGCC, you can follow [this](GATEWAY.md) guide
 
 ## Configuration
 All configuration values can be set via the environment or a configuration file. The default path for the configuration file if the folder above the `src` directory. This can be changed by setting the `UGCC_CONFIG_FILE` environment variable. `UGCC_` (UbirchGoclientChirpstackConnector) is a prefix for all environment variables. All configuration values that have no default value must be set manually.
