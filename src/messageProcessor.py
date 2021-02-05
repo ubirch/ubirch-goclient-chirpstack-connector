@@ -91,7 +91,7 @@ class MessageProcessor():
     """ this function decodes the data and puts it into a json object """
     # remove base64 coding
     try:
-      dataBytes = base64.decodestring(bytes(data, "utf8"))
+      dataBytes = base64.decodebytes(bytes(data, "utf8"))
     except Exception as e:
       self.log.error("Error decoding base64 encoded application data: '%s'" % data)
       self.log.exception(e)
