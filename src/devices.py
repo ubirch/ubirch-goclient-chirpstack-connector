@@ -23,8 +23,12 @@ class Devices():
     self.config = config
     self.log = log
 
+    # start the device initialisation
+    self.initialiseDevices()
+
+  def initialiseDevices(self):
     # initialise the single devices
-    for rawDevice in config.devices:
+    for rawDevice in self.config.devices:
       # get the matching password for the device
       ubPass = self.config.ubPass.get(rawDevice.get("deviceUUID"))
 
@@ -34,13 +38,26 @@ class Devices():
           (rawDevice.get("deviceUUID"), rawDevice.get("deviceEUI"), rawDevice.get("deviceID"))
         )
 
-      self.devices.append(Device(
-        rawDevice.get("deviceEUI"),
-        rawDevice.get("deviceUUID"),
-        ubPass,
-        rawDevice.get("roundsPkW"),
-        rawDevice.get("deviceID")
-      ))
+      # check if the device is already known
+      devices = list(filter(lambda x: x.eui == rawDevice.get("deviceEUI"), self.devices))
+      if len(devices) != 0:
+        self.log.debug("Updating a device with EUI '%s' ..." % rawDevice.get("deviceEUI"))
+
+        # there can only be one device with the EUI; index 0 can be assumed
+        devices[0].uuid = rawDevice.get("deviceUUID")
+        devices[0].passwd = ubPass
+        devices[0].roundsPkW = rawDevice.get("roundsPkW")
+        devices[0].id = rawDevice.get("deviceID")
+      else:
+        self.log.debug("Adding a new device with EUI='%s' ..." % rawDevice.get("deviceEUI"))
+
+        self.devices.append(Device(
+          rawDevice.get("deviceEUI"),
+          rawDevice.get("deviceUUID"),
+          ubPass,
+          rawDevice.get("roundsPkW"),
+          rawDevice.get("deviceID")
+        ))
 
   def getDeviceByEUI(self, eui : str) -> Device:
     """ this function gets a device from self.devices by its eui """
