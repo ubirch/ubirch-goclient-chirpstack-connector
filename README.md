@@ -16,8 +16,58 @@ python3.8 src/main.py
 * If you are using a RAK7244C gateway to set up the UGCC, you can follow [this](GATEWAY.md) guide
 
 ## Configuration
-All configuration values can be set via the environment or a configuration file. The default path for the configuration file if the folder above the `src` directory. This can be changed by setting the `UGCC_CONFIG_FILE` environment variable. `UGCC_` (UbirchGoclientChirpstackConnector) is a prefix for all environment variables. All configuration values that have no default value must be set manually.
-
+All configuration values can be set via the environment or a configuration file. The default path for the configuration file if the folder above the current directory. This can be changed by setting the `UGCC_CONFIG_FILE` environment variable. `UGCC_` (UbirchGoclientChirpstackConnector) is a prefix for all environment variables. All configuration values that have no default value must be set manually.
+**Note** that values from the configuration file have a higher priority. It generally is *not* recommended to use environment variables. Injecting the following values via the environment might even cause the program to crash:
+```
+config.devices
+config.ubpass
+```
+This is caused by the ability to add and update devices while running, see [Adding New Devices](#adding-new-devices). This is how the structure of your configuration file should look like:
+```json
+{
+  "log": {
+    "level": 10,
+    "file": "/dev/stdout",
+    "format": "[%(asctime)s]--[%(levelname)-8s]  %(message)s",
+    "maxBytes": 2000000.0,
+    "backupCount": 3
+  },
+  "devices": [],
+  "ubpass": {},
+  "http": {
+    "timeout": 5,
+    "attempts": 3,
+    "retryDelay": 3
+  },
+  "mqtt": {
+    "user": "SECRET",
+    "pass": "SECRET",
+    "host": "192.168.0.199",
+    "port": 1883
+  },
+  "goClient": {
+    "url": "http://192.168.0.199:10000/"
+  },
+  "realto": {
+    "url": "https://ra-pz.azure-api.net/datacollector/ubirch/",
+    "subKey": "SECRET"
+  },
+  "fludia": {
+    "url": "https://fm430-api.fludia.com/v1/callback",
+    "user": "SECRET",
+    "pass": "SECRET"
+  },
+  "registrator": {
+    "enableRegistrator": true,
+    "goClientConfig": "/home/pi/ubirch_client/goclient.json",
+    "goClientService": "ubrich_client",
+    "registrationURL": "https://127.0.0.1/registrator",
+    "uBirchToken": "SECRET",
+    "chirpstackApiURL": "https://192.168.0.199:8080/api",
+    "chirpstackApiToken": "SECRET"
+  }
+}
+```
 ### Logging Configuration
 Note that before the configuration file is loaded, logs will be written to `"/dev/stdout"`
 #### 'UGCC_DEFAULT_LOG_FILE'
@@ -274,13 +324,79 @@ Example:
   "password123"
 ```
 
-### Data package structure
+### Registrator Configuration
+#### `registrator.enableRegistrator` / `UGCC_ENABLE_REGISTRATOR`
+```
+THIS CURRENTLY HAS TO BE SET TO 'false' BECAUSE THE DEVICE REGISTTRATOR IS NOT WORKING
+Descr:  Enables or disables the device registrator
+Type:   bool
+Example:
+
+  true
+  false
+```
+
+#### `registrator.goClientConfig` / `UGCC_REGISTRATOR_GOCLIENTCONFIG`
+```
+Descr:  The Go-Client Configuration file path (absolute)
+Type:   str
+Example:
+
+  "/opt/goClient/config.json"
+```
+
+#### `registrator.goClientService` / `UGCC_REGISTRATOR_GOCLIENTSERVICE`
+```
+Descr:  The Go-Client service name
+Type:   str
+Example:
+
+  "ubirch_client"
+```
+
+#### `registrationURL` / `UGCC_REGISTRATOR_REGISTRATIONURL`
+```
+Descr:  The uBirch device registration URL (with formatting for env)
+Type:   str
+Example:
+
+  "https://placeholder.%s.ubirch.com"
+```
+
+#### `uBirchToken` / `UGCC_REGISTRATOR_UBIRCHTOKEN`
+```
+Descr:  The uBirch device registration token
+Type:   str
+Example:
+
+  "mXYeRqmaTx8l3WVtWN+Pmw=="
+```
+
+#### `chirpstackApiURL` / `UGCC_REGISTRATOR_CHIRPSTACKAPIURL`
+```
+Descr:  The Chirpstack API Url (without trailing /)
+Type:   str
+Example:
+
+  "https://127.0.0.1:8080/api"
+```
+
+#### `chirpstackApiToken` / `UGCC_REGISTRATOR_CHIRPSTACKAPITOKEN`
+```
+Descr:  The Chirpstack API Token
+Type:   str
+Example:
+
+  "TikGoa6AePAsSfIg68lurvuLTo6aAxGllKA5dOKbAROEcUvKcnw2d7j2aN1zyrn4GC25k7PDkojp"
+```
+
+## Data package structure
 
 The generated data package is in json format and has the following form and fields:
 ```
 {
     "device_properties":{
-        "deveui":"70b3d54a00000aac"
+        "deveui":"xxxxxxxxxxxxxxxx"
     },
     "meterId":"SomeID",
     "payload_cleartext":"46000007000000000000",
@@ -292,10 +408,25 @@ The generated data package is in json format and has the following form and fiel
     "type":"uplink"
 }
 ```
-### Verification
+## Adding new devices
+There are two ways (currently only one since the automated device registrator is not working) of adding a new devices.
+**The first one** is archieved by directly modifying the `devices` and `ubpass` values in the configuration file. This requires restarting the UGCC afterwards.
+Besides that, you will also have to modify the configuration file of the uBirch GoClient and restart it.
+~~**The second one** works by registering a new device at Chirpstack and inject additional information in its description field. A detailed description can be found in the [Gateway Setup Guide](GATEWAY.md). The contents of the description field must represent a JSON object with the following structure:~~
+```json
+{
+  "eui": "XXXXXXXXXXXXXXXX",
+  "uuid": "XXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
+  "cr": 75,
+  "id": "SomeExampleID"
+}
+```
+~~Everytime the UGCC recieved a message from Chirpstack it checks if it knows the devices from which the measurement originates. If it doesn't know the device, it will request the device object from Chirpstack, containing the description which in itself contains a JSON object as described above. The contained UUID will then be used to register the device at the uBirch-Backend. The registration process returns the uBirch-Device-Auth-Token which will be saved into the configuration along with all other values. The UGCC will also update the configuration of the Go-Client and restart it. After restarting the Go-Client generates a Keypair for the new device and sends the public key to the uBirch-Backend using the uBirch-Device-Auth-Token obtained earlier.~~
+
+## Verification
 To verify the data, got to [ubirch colsole](https://console.prod.ubirch.com/verification/json) and enter the base64 encoded hash of the data.
 
-#### Create hash for verification
+### Create a hash for verification
 To create a hash for verification, you can use the following python script:
 ```
 >>> import json, hashlib, base64

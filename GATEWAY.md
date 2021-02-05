@@ -26,6 +26,7 @@ It contains a step by step guide from setting up the OS itself over [Chirpstack]
       - [Install Python 3.8](#install-python-38)
     - [UGCC Configuration](#ugcc-configuration)
     - [Fludia Sensor Setup](#fludia-sensor-setup)
+      - [Generate a UUID](#generate-a-uuid)
       - [Device Registration at the uBirch Backend](#device-registration-at-the-ubirch-backend)
       - [Device Registration at the ChirpStack WebInterface](#device-registration-at-the-chirpstack-webinterface)
       - [Adjusting config files for the new device](#adjusting-config-files-for-the-new-device)
@@ -43,7 +44,7 @@ It contains a step by step guide from setting up the OS itself over [Chirpstack]
 ```sh
 sudo dd if=IMAGE_NAME.img status=progess of=/dev/mmcblk0
 ```
-* Of course, `/dev/mmcblk0` is just the path to the Micro-SD card on my system. It may vary on yours; make sure you use the correct path, becuase you might accidentially overwrite data on other devices.
+* Of course, `/dev/mmcblk0` is just the path to the Micro-SD card on my system. It may vary on yours; make sure you use the correct path, because you might accidentially overwrite data on other devices.
 
 ### OS Configuration
 * Insert the Micro-SD card and power on the device. The first boot will take a while (...), you can check the progress by connecting the gateway to your monitor with a HDMI-microHDMI cable. Continue once it reaches the login prompt.
@@ -181,7 +182,7 @@ jwt_secret="kxqExbs7wW6aGKkpKQF9batAyUu3Hy5XQuRYC3mzVZs="
 * Further information on the WebInterface can be obtained via [ChirpStacks official documentation](https://www.chirpstack.io/application-server/).
 
 ### API Key generation
-* If you plan to use the "automated" device registrator, you will have to generate an API token. Log into your Chirpstack instance (default credentials: `admin`:`admin`), go to the API tab and create a new key. **Note** that the key will only be shown once and you won't be able to access it after leaving the page. Note it down somewhere.
+* If you plan to use the "automated" device registrator (currently not working, but the key can still be used to register the device at the Chirpstack API with the Chirpstack-Api-Tool), you will have to generate an API token. Log into your Chirpstack instance (default credentials: `admin`:`admin`), go to the API tab and create a new key. **Note** that the key will only be shown once and you won't be able to access it after leaving the page. Note it down somewhere.
 
 ## MQTT Configuration
 * ChirpStack publishes most of its internal events on MQTT. This is used by the UGCC to get device messages and process them. The MQTT server used in this case is [Moquitto](https://mosquitto.org/). By default, it does not require any authentication which might not be optimal. Therefore, a user + password should be configured.
@@ -324,55 +325,10 @@ pip3.8 install -r requirements.txt
 ```
 
 ### UGCC Configuration
-* Configuration is done using a JSON file. The name and position of this file can be chosen freely, as the path will be set in the service file later. An example configuration could look like this:
-```
-cat /home/pi/ubirch-goclient-chirpstack-connector/config.json
-```
-```
-{
-  "log": {
-    "level": 10,
-    "file": "/home/pi/ugcc.log",
-    "format": "[%(asctime)s]--[%(levelname)-8s]  %(message)s",
-    "maxBytes": 2e6,
-    "backupCount": 5
-  },
-  "devices": [
-    {
-    }
-  ],
-  "ubpass": {
-  },
-  "http": {
-    "timeout": 5,
-    "attempts": 3,
-    "retryDelay": 3
-  },
-  "mqtt": {
-    "user": "MQTT_USER",
-    "pass": "MQTT_PASS",
-    "host": "127.0.0.1",
-    "port": 1883
-  },
-  "goClient": {
-    "url": "http://192.168.0.174:10000/"
-  },
-  "realto": {
-    "url": "https://ra-pz.azure-api.net/datacollector/ubirch/",
-    "subKey": "REALTO_SUBKEY"
-  },
-  "fludia": {
-    "url": "https://fm430-api.fludia.com/v1/callback",
-    "user": "FLUDIA_USER",
-    "pass": "FLUDIA_PASS"
-  }
-}
-
-```
-* **Note** that a detailed description of all fields can be found in the main [README.md](README.md) file
+* An actual desciption of the different values in the configuration file (...) is given in the [main Readme](README.md).
 * The `mqtt.user` and `mqtt.pass` fields have to be adapted to the values configured above during the [MQTT configuration](#mqtt-configuration)
-* The same goes for `goClient.url` value, specifically to port, which is configured during the [GoClient configuration](#ubirch-goclient-configuration)
-* As the UGCC should also be started on boot, is also needs a service file: `/etc/systemd/system/ugcc.service`
+* The same goes for `goClient.url` value, specifically the port, which is configured during the [GoClient configuration](#ubirch-goclient-configuration)
+* As the UGCC should also be started on boot, it also needs a service file: `/etc/systemd/system/ugcc.service`
 ```
 [Unit]
 Description=uBirch UGCC service
@@ -400,8 +356,10 @@ sudo systemctl enable ugcc
 
 ### Fludia Sensor Setup
 * First, note down the LoRa EUI of the sensor.
+* ~~The steps below only apply to manual device registration. For a more up-to-date guide take a look at [automatic device registration](AUTO-DEVREG.md).~~
+* ~~**NOTE** that if you do not want to use the automatic device registrator you must disable it in the configuration file of the UGCC.~~
 
-#### Device Registration at the uBirch Backend
+#### Generate a UUID
 * A UUID is required to register a device at the uBirch backend, this UUID can be generated from its EUI using the `uuidgen.py` script contained in this repository. It can simply be executed with python and will ask for the device EUI, after that it will print out the UUID
 ```
 python3.8 uuidgen.py
@@ -412,7 +370,9 @@ Namespace: eon.uuid.trustservice -> ubirch / ee2a7eee-4ae4-577a-a647-07877df3819
 DevEUI > aaaaaaaaaaaaaaaa
 UUID: 5dfe791d-7289-5067-99c5-d6d0a1909a54
 ```
-* **Note** that the UUID will be auto-lowercased
+* **Note** that the EUI will be auto-lowercased
+
+#### Device Registration at the uBirch Backend
 * The UUID can be used to register the device. Mind the uBirch backend environment used during configuring the [GoClient](#ubirch-goclient-configuration) and the [UGCC](#ubirch-goclient-configuration). For the `prod` env, the console URL would be https://console.prod.ubirch.com
 
 #### Device Registration at the ChirpStack WebInterface
@@ -421,6 +381,7 @@ UUID: 5dfe791d-7289-5067-99c5-d6d0a1909a54
 * Now you will have to create an application.
 * You should now be in the `DEVICES` of the application. Click on the `+CREATE` button.
 * Enter a name for the new device, as well as a describtion and the device EUI.
+  * ~~If you intend to use the automatic device registrator you will have to provide extra informaiton using the description field, see [above](#use-the-automatic-device-registrator-recommended).~~
 * Chose the default device profile and make sure that both the `Disable frame-counter validation` and the `Device is disabled` boxes are not checked.
 * Press on the `CREATE DEVICE` button.
 * You will now have to manually set the `Application key` for your device, since Fludia sensors have an application key "burned in". This hard-coded key must be obtained from Fludia. Go to the `KEYS (OTAA)` tab and paste the key into the `Application key` field. Press on `SET DEVICE-KEYS`.
