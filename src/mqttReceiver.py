@@ -41,14 +41,21 @@ class MQTTReceiver():
       # set the password
       self.mqttClient.username_pw_set(self.user, self.passwd)
 
-    self.log.debug("Trying to connect to MQTT-Broker @ '%s:%d' ..." % (self.rhost, self.rport))
-
     # only connect; subscribing to a topic is done by _onConnect
-    try:
-      self.mqttClient.connect(self.rhost, port=self.rport)
-    except Exception as e:
-      self.log.error("Error connecting to the MQTT-Broker @ '%s:%d'!" % (self.rhost, self.rport))
-      self.log.exception(e)
+    while True:
+      self.log.debug("Trying to connect to MQTT-Broker @ '%s:%d' ..." % (self.rhost, self.rport))
+
+      try:
+        self.mqttClient.connect(self.rhost, port=self.rport)
+      except Exception as e:
+        self.log.error("Error connecting to the MQTT-Broker @ '%s:%d'!" % (self.rhost, self.rport))
+        self.log.exception(e)
+
+        # try again
+        continue
+
+      # break out of the connection loop
+      break
 
   def _onConnect(self, client : mqtt.Client, userdata, flags, status : int):
     """ function to be registered as 'on_connect' callback """
