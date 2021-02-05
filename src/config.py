@@ -1,6 +1,7 @@
 import os
 import sys
 import json
+import shutil
 import logging
 from typing import Callable
 
@@ -12,11 +13,10 @@ class Config():
     self.log = log
     self.config : dict = None
     self.configFD = None
+    self.backupPath = self.configFile + ".backup"
 
-    # used to signalise init success/failure to the caller
-    self.initSuccess = False
-
-    # set default values
+  def readCfg(self) -> bool:
+    # set default values (None means that is has to be set)
     self.logLevel : int = 10
     self.logFile : str = "/dev/stdout"
     self.logFormat : str = "[%(asctime)s]--[%(levelname)-8s]  %(message)s"
@@ -37,6 +37,14 @@ class Config():
     self.fludiaUrl : str = None
     self.fludiaUser : str = None
     self.fludiaPass : str = None
+    self.goClientExec : str = None
+    self.enableRegistrator : bool = False
+    self.registratorGoClientConfig : str = ""
+    self.registratorGoClientService : str = ""
+    self.registratorRegistrationURL : str = ""
+    self.registratorUbirchToken : str = ""
+    self.registratorChirpstackApiURL : str = ""
+    self.registratorChirpstackApiToken : str = ""
 
     # try to open the config file
     self.log.debug("Trying to open config file '%s' ..." % self.configFile)
@@ -47,7 +55,7 @@ class Config():
       self.log.error("Error opening config file '%s'!" % self.configFile)
       self.log.exception(e)
 
-      return
+      return False
 
     # try to parse the config file
     self.log.debug("Trying to parse the config file '%s' ..." % self.configFile)
@@ -58,7 +66,7 @@ class Config():
       self.log.error("Error pasing the config file '%s'!" % self.configFile)
       self.log.exception(e)
 
-      return
+      return False
 
     # close the fd
     self.configFD.close()
@@ -105,11 +113,54 @@ class Config():
       self.log.debug("fludiaUser => %s" % self.fludiaUser)
       self.fludiaPass = self._getValueConfigOrEnv(["fludia", "pass"], "UGCC_FLUDIA_PASS", default=self.fludiaPass)
       self.log.debug("fludiaPass => len = %d" % len(self.fludiaPass))
+      self.enableRegistrator = self._getValueConfigOrEnv(["registrator", "enableRegistrator"], "UGCC_ENABLE_REGISTRATOR", default=self.enableRegistrator, convertFunc=bool)
+      self.log.debug("enableRegistrator => %s" % str(self.enableRegistrator))
+      self.registratorGoClientConfig = self._getValueConfigOrEnv(["registrator", "goClientConfig"], "UGCC_REGISTRATOR_GOCLIENTCONFIG", default=self.registratorGoClientConfig)
+      self.log.debug("registratorGoClientConfig => %s" % self.registratorGoClientConfig)
+      self.registratorGoClientService = self._getValueConfigOrEnv(["registrator", "goClientService"], "UGCC_REGISTRATOR_GOCLIENTSERVICE", default=self.registratorGoClientService)
+      self.log.debug("registratorGoClientService => %s" % self.registratorGoClientService)
+      self.registratorRegistrationURL = self._getValueConfigOrEnv(["registrator", "registrationURL"], "UGCC_REGISTRATOR_REGISTRATIONURL", default=self.registratorRegistrationURL)
+      self.log.debug("registratorRegistrationURL => %s" % self.registratorRegistrationURL)
+      self.registratorUbirchToken = self._getValueConfigOrEnv(["registrator", "uBirchToken"], "UGCC_REGISTRATOR_UBIRCHTOKEN", default=self.registratorUbirchToken)
+      self.log.debug("registratorUBirchToken => len = %d" % len(self.registratorUbirchToken))
+      self.registratorChirpstackApiURL = self._getValueConfigOrEnv(["registrator", "chirpstackApiURL"], "UGCC_REGISTRATOR_CHIRPSTACKAPIURL", default=self.registratorChirpstackApiURL)
+      self.log.debug("registratorChirpstackApiURL => %s" % self.registratorChirpstackApiURL)
+      self.registratorChirpstackApiToken = self._getValueConfigOrEnv(["registrator", "chirpstackApiToken"], "UGCC_REGISTRATOR_CHIRPSTACKAPITOKEN", default=self.registratorChirpstackApiToken)
+      self.log.debug("registratorChirpstackApiToken => len = %d" % len(self.registratorChirpstackApiToken))
     except:
-      return
+      return False
 
     # got trough
-    self.initSuccess = True
+    return True
+
+  def save(self) -> bool:
+    """ writes self.config back to the configuration file (creates a backup first) """
+    self.log.info("Saving the current configuration to '%s' (placing backed up at: '%s')" %
+      (self.configFile, self.backupPath)
+    )
+
+    # create the backup
+    shutil.copyfile(self.configFile, self.backupPath)
+
+    # write the current config
+    with open(self.configFile, 'w') as fd:
+      json.dump(self.config, fd, indent=2)
+
+  def revert(self) -> bool:
+    """ loads the backup and overwrites the current coniguration """
+    if os.path.exists(self.backupPath):
+      # overwrite the current config with the backup
+      shutil.copyfile(self.backupPath, self.configFile)
+
+      # re-read the configuration
+      if self.readCfg() == False:
+        self.log.error("Error reading the restored configuration! (%s)" % self.configFile)
+
+      return True
+    else:
+      self.log.error("Cannot revert to backup configuration! (File '%s' not found)" % self.backupPath)
+
+      return False
 
   def _getValueConfigOrEnv(self, keyPath : list, envName : str, default : object = None, convertFunc : Callable[[object], object] = None) -> object:
     """ get a config value from the config file or environment """
