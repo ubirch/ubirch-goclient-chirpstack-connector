@@ -10,7 +10,7 @@ class HttpSend():
     self.retryDelay = retryDelay
     self.log = log
 
-  def httpSend(self, url : str, headers : dict, data : object) -> (int, str, str):
+  def httpSend(self, url : str, headers : dict, data : object, operation : str = "post", verify : bool = True) -> (int, str, str):
     """ sends a http request to a given url """
     # set the amount of attempts left
     attemptsLeft = self.attempts
@@ -20,8 +20,8 @@ class HttpSend():
     # try to send it
     while True:
       try:
-        r = requests.post(
-          url, headers=headers, data=data, timeout=self.timeout
+        r = requests.request(
+          operation, url, headers=headers, data=data, timeout=self.timeout, verify=verify
         )
       except Exception as e:
         self.log.exception(e)
