@@ -179,6 +179,9 @@ jwt_secret="kxqExbs7wW6aGKkpKQF9batAyUu3Hy5XQuRYC3mzVZs="
 
 ### Configuration in the WebInterface
 * Basic configuration is quite intuitive and you can edit/create users, organisations and so on.
+* One thing that you might have to do to make Chirpstack work is delete the default gateway and create a new one
+  * Go to Gateways and delete the default one
+  * Create a new Gateway. You can chose everything as you will except for the GatewayID. You can get the ID by running the `gateway-version` command on the gateway.
 * Further information on the WebInterface can be obtained via [ChirpStacks official documentation](https://www.chirpstack.io/application-server/).
 
 ### API Key generation
