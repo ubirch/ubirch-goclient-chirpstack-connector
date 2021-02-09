@@ -42,7 +42,7 @@ It contains a step by step guide from setting up the OS itself over [Chirpstack]
 ### OS Installation
 * After unpacking the ZIP file, the contained `.img` file can be flashed onto the Micro-SD card. On Linux systems, the `.img` can be flashed like this:
 ```sh
-sudo dd if=IMAGE_NAME.img status=progess of=/dev/mmcblk0
+sudo dd if=IMAGE_NAME.img status=progress of=/dev/mmcblk0
 ```
 * Of course, `/dev/mmcblk0` is just the path to the Micro-SD card on my system. It may vary on yours; make sure you use the correct path, because you might accidentially overwrite data on other devices.
 
