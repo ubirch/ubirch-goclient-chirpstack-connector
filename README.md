@@ -16,13 +16,12 @@ python3.8 src/main.py
 * If you are using a RAK7244C gateway to set up the UGCC, you can follow [this](GATEWAY.md) guide
 
 ## Configuration
-All configuration values can be set via the environment or a configuration file. The default path for the configuration file if the folder above the current directory. This can be changed by setting the `UGCC_CONFIG_FILE` environment variable. `UGCC_` (UbirchGoclientChirpstackConnector) is a prefix for all environment variables. All configuration values that have no default value must be set manually.
-**Note** that values from the configuration file have a higher priority. It generally is *not* recommended to use environment variables. Injecting the following values via the environment might even cause the program to crash:
+All configuration values can be set via the environment or a configuration file which you will have to create. The default path for the configuration file is the folder above the current directory (the UGCC will look for it in the directory above the one it is started from). This can be changed by setting the `UGCC_CONFIG_FILE` environment variable. It is recommended to use absolute paths. `UGCC_` is a prefix for all environment variables used by the UGCC. It generally is *not* recommended to use environment variables and values from the configuration file have a higher priority. Injecting the following values via the environment might even cause the program to crash:
 ```
-config.devices
-config.ubpass
+config.devices (UGCC_DEVICES)
+config.ubpass (UGCC_UBPASS)
 ```
-This is caused by the ability to add and update devices while running, see [Adding New Devices](#adding-new-devices). This is how the structure of your configuration file should look like:
+This is caused by the ability to add and update devices while running, see [Adding New Devices](#adding-new-devices). An example path for the configuration file might be `/home/pi/ubirch-goclient-chirpstack-connector/config.json` (you will have to pass this path the the UGCC using the env) and its contents should look like this:
 ```json
 {
   "log": {
