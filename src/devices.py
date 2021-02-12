@@ -5,7 +5,7 @@ import config
 
 
 class Device():
-  def __init__(self, eui : str, uuid : str, passwd : str, roundsPkW : int, deviceID : str):
+  def __init__(self, eui : str, uuid : str, passwd : str, deviceID : str):
     """ init function of the device class """
     self.eui = eui
     self.uuid = uuid
