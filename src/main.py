@@ -2,6 +2,7 @@ import os
 import sys
 import logging
 import json
+import traceback
 
 import log
 import config
@@ -30,6 +31,9 @@ class Main():
     
     # set up the inital logger (pre-config)
     self.log = log.setupLog(initialLogger=True)
+
+    # register the unhandled exception handler
+    sys.excepthook = self._unhandledExceptionHandler
 
     # check for success
     if not self.log:
@@ -105,6 +109,12 @@ class Main():
     self.log.info("The MQTTReceiver terminated - Exiting!")
 
     return
+
+
+  def _unhandledExceptionHandler(self, eType, eVal, eTrace):
+    msg = "".join(traceback.format_exception(eType, eVal, eTrace))
+
+    self.log.critical("Unhandled exception: %s", msg)
 
   def messageCB(self, message : mqttReceiver.mqtt.MQTTMessage):
     """ function to be registered as message callback (MQTT) """
