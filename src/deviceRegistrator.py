@@ -57,6 +57,9 @@ class DeviceRegistrator:
 
       return
 
+    # reboot the device in ordner to apply changes
+    self._reboot()
+
     return
 
   def getDeviceDescr(self, devEUI : str) -> dict:
@@ -115,9 +118,6 @@ class DeviceRegistrator:
 
       return False
 
-    # restart the go-client
-    self._restartGoClient()      
-
     return True
 
   def _modifyUgccConfig(self, devEUI : str, devUbToken : str, devDescr : dict) -> bool:
@@ -146,6 +146,7 @@ class DeviceRegistrator:
     return True
 
   def _modifyGoClientConfig(self, devUUID : str, devUbToken : str) -> bool:
+    """ adds the new device to the GoClient configuration file """
     self.log.debug("Adding the new device to the Go-Client configuration ...")
 
     try:
@@ -172,16 +173,16 @@ class DeviceRegistrator:
 
     return True
 
-  def _restartGoClient(self) -> bool:
-    """ restarts the GoClient so that the config changes will come into effect """
-    self.log.debug("Trying to restart the Go-Client ('%s') ..." % self.goClientService)
+  def _reboot(self) -> bool:
+    """ reboots the device to apply changes """
+    self.log.debug("Trying to reboot the device ...")
 
     # restart the service; output will be ignored
-    p = subprocess.Popen(["systemctl", "restart", self.goClientService], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    p = subprocess.Popen(["systemctl", "-i", "reboot"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     p.communicate()
 
     if p.returncode != 0:
-      self.log.error("Error restarting the Go-Client! Return Code = '%d'" % p.returncode)
+      self.log.error("Error rebooting the device! Return Code = '%d'" % p.returncode)
 
       return False
 
