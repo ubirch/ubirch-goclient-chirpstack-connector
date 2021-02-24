@@ -318,6 +318,7 @@ make -j 4
 make altinstall
 cd /tmp
 rm -rf Python-3.8.0*
+pip3.8 install --upgrade pip
 ```
 * Clone [this](.) repository into the home directory of the user `pi`
 ```
