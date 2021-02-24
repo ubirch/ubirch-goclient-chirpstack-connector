@@ -209,9 +209,9 @@ password_file /etc/mosquitto/passwd
 * All ChirpStack components handle MQTT messaging themselves. That means, that all configuration files have to be updated to use the newly created credentials. These files are:
 ```
 /etc/chirpstack-application-server/chirpstack-application-server.toml
-/etc/chirpstack-application-server/chirpstack-gateway-bridge.toml
-/etc/chirpstack-application-server/chirpstack-network-server.toml
-/etc/chirpstack-application-server/chirpstack-network-server.eu_863_870.toml
+/etc/chirpstack-gateway-bridge/chirpstack-gateway-bridge.toml
+/etc/chirpstack-network-server/chirpstack-network-server.toml
+/etc/chirpstack-network-server/chirpstack-network-server.eu_863_870.toml
 ```
 * **Note** that the last file might differ in your case. It depends on your region/on the LoRa frequency you configured ChirpStack to use. In all of these files you will have to search for `mqtt server` and change the `username` and `password` variables nearby to the username and password you chose above.
 After that, restart all the involved services and check if they are still running fine.
