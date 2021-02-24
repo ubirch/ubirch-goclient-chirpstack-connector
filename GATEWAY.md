@@ -209,9 +209,9 @@ password_file /etc/mosquitto/passwd
 * All ChirpStack components handle MQTT messaging themselves. That means, that all configuration files have to be updated to use the newly created credentials. These files are:
 ```
 /etc/chirpstack-application-server/chirpstack-application-server.toml
-/etc/chirpstack-application-server/chirpstack-gateway-bridge.toml
-/etc/chirpstack-application-server/chirpstack-network-server.toml
-/etc/chirpstack-application-server/chirpstack-network-server.eu_863_870.toml
+/etc/chirpstack-gateway-bridge/chirpstack-gateway-bridge.toml
+/etc/chirpstack-network-server/chirpstack-network-server.toml
+/etc/chirpstack-network-server/chirpstack-network-server.eu_863_870.toml
 ```
 * **Note** that the last file might differ in your case. It depends on your region/on the LoRa frequency you configured ChirpStack to use. In all of these files you will have to search for `mqtt server` and change the `username` and `password` variables nearby to the username and password you chose above.
 After that, restart all the involved services and check if they are still running fine.
@@ -305,18 +305,20 @@ sudo systemctl enable ubirch_client
 #### Install Python 3.8
 * The UGCC needs Python 3.8 which is not in the default repositories and therefore has to be installed manually.
 ```
-sudo apt install build-essential tk-dev libncurses5-dev libncursesw5-dev libreadline6-dev libdb5.3-dev libgdbm-dev libsqlite3-dev libssl-dev libbz2-dev libexpat1-dev liblzma-dev zlib1g-dev libffi-dev tar wget vim
+sudo su
+
+apt install build-essential tk-dev libncurses5-dev libncursesw5-dev libreadline6-dev libdb5.3-dev libgdbm-dev libsqlite3-dev libssl-dev libbz2-dev libexpat1-dev liblzma-dev zlib1g-dev libffi-dev tar wget vim
 
 cd /tmp
-sudo wget https://www.python.org/ftp/python/3.8.0/Python-3.8.0.tgz
-sudo tar zxf Python-3.8.0.tgz
+wget https://www.python.org/ftp/python/3.8.0/Python-3.8.0.tgz
+tar zxf Python-3.8.0.tgz
 cd Python-3.8.0
-sudo ./configure --enable-optimizations
-sudo make -j 4
-sudo make altinstall
+./configure --enable-optimizations
+make -j 4
+make altinstall
 cd /tmp
-sudo rm -rf Python-3.8.0*
-pip3.8 install --user --upgrade pip
+rm -rf Python-3.8.0*
+pip3.8 install --upgrade pip
 ```
 * Clone [this](.) repository into the home directory of the user `pi`
 ```
