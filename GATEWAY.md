@@ -305,18 +305,19 @@ sudo systemctl enable ubirch_client
 #### Install Python 3.8
 * The UGCC needs Python 3.8 which is not in the default repositories and therefore has to be installed manually.
 ```
-sudo apt install build-essential tk-dev libncurses5-dev libncursesw5-dev libreadline6-dev libdb5.3-dev libgdbm-dev libsqlite3-dev libssl-dev libbz2-dev libexpat1-dev liblzma-dev zlib1g-dev libffi-dev tar wget vim
+sudo su
+
+apt install build-essential tk-dev libncurses5-dev libncursesw5-dev libreadline6-dev libdb5.3-dev libgdbm-dev libsqlite3-dev libssl-dev libbz2-dev libexpat1-dev liblzma-dev zlib1g-dev libffi-dev tar wget vim
 
 cd /tmp
-sudo wget https://www.python.org/ftp/python/3.8.0/Python-3.8.0.tgz
-sudo tar zxf Python-3.8.0.tgz
+wget https://www.python.org/ftp/python/3.8.0/Python-3.8.0.tgz
+tar zxf Python-3.8.0.tgz
 cd Python-3.8.0
-sudo ./configure --enable-optimizations
-sudo make -j 4
-sudo make altinstall
+./configure --enable-optimizations
+make -j 4
+make altinstall
 cd /tmp
-sudo rm -rf Python-3.8.0*
-pip3.8 install --user --upgrade pip
+rm -rf Python-3.8.0*
 ```
 * Clone [this](.) repository into the home directory of the user `pi`
 ```
