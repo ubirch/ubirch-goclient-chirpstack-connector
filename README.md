@@ -152,7 +152,6 @@ Example:
     {
       "deviceEUI": "xxxxxxxxxxxxxxxx",
       "deviceUUID": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
-      "roundsPkW": 70,
       "deviceID": "xxxxxxxx"
     },
     {
@@ -162,9 +161,8 @@ Example:
   ]
 
   #
-  # deviceEUI: The LoRa EUI of the device.
-  # deviceUUID: The UUID of the device.
-  # roundsPkW: Meter-specific
+  # deviceEUI: The LoRa EUI of the device
+  # deviceUUID: The UUID of the device
   # deviceID: ID of the meter
   #
 ```
