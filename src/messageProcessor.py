@@ -101,9 +101,6 @@ class MessageProcessor():
       "rawBytes": "".join(format(x, "02x") for x in dataBytes)
     }
 
-  def roundsToWh(self, rounds, roundsPkWh) -> int:
-    return int(rounds / (roundsPkWh / 1000))
-
   def _getValueFromDict(self, keyPath : list, currentObj : dict) -> object:
     """ this function gets an object from the config object: config[path[0]][path[1]][path[n]] """
     if len(keyPath) == 0 or not currentObj:
