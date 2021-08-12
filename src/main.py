@@ -151,6 +151,8 @@ class Main():
           else:
             # the device is unknown but device registration is disabled
             self.log.warning("Unknown device EUI ('%s')! Device registration is disabled - ignoring message ..." % eui)
+            
+            return
 
         # try to create the data packet
         try:
