@@ -25,7 +25,7 @@ It contains a step by step guide from setting up the OS itself over [Chirpstack]
     - [UGCC Installation](#ugcc-installation)
       - [Install Python 3.8](#install-python-38)
     - [UGCC Configuration](#ugcc-configuration)
-    - [Fludia Sensor Setup](#fludia-sensor-setup)
+    - [Sensor Setup](#sensor-setup)
       - [Generate a UUID](#generate-a-uuid)
       - [Device Registration at the uBirch Backend](#device-registration-at-the-ubirch-backend)
       - [Device Registration at the ChirpStack WebInterface](#device-registration-at-the-chirpstack-webinterface)
@@ -179,6 +179,7 @@ jwt_secret="kxqExbs7wW6aGKkpKQF9batAyUu3Hy5XQuRYC3mzVZs="
 
 ### Configuration in the WebInterface
 * Basic configuration is quite intuitive and you can edit/create users, organisations and so on.
+* **Important**: Enable Gateway Metadata and Network Geolocation in the default service profile under service profile. If you add new profiles, also enable those settings there. This will make Chirpstack add additional information like the receive signal quality or it's current GPS location to each sensor message it published via MQTT. The UGCC will then be able to use these information.
 * You can delete default Applications and Devices
 * One thing that you might have to do to make Chirpstack work is delete the default gateway and create a new one
   * Go to Gateways and delete the default one
@@ -241,7 +242,7 @@ After some time you should see messages appear.
 These are:
   * the [installation](#ubirch-goclient-installation) and [configuration](#ubirch-goclient-configuration) of the [uBirch-GoClient](https://github.com/ubirch/ubirch-client-go)
   * the [installation](#ugcc-installation) and [configuration](#ugcc-configuration) of the [UGCC](.) itself
-  * and the [setup](#fludia-sensor-setup) of a [Fludia](https://www.fludia.com/?lang=en) sensor
+  * and the [setup](#sensor-setup) of a sensor
 
 ### uBirch GoClient Installation
 * Before installing the [GoClient](https://github.com/ubirch/ubirch-client-go), you will have to install Golang.
@@ -360,10 +361,9 @@ sudo systemctl enable ugcc
 ```
 * A special characteristic of the UGCC is that it will log to the normal Systemd log before loading the configuration file and then it will start logging to the specified log file
 
-### Fludia Sensor Setup
+### Sensor Setup
+* **Important:** This is only a rough guideline on how to setup a sensor. This is caused by the fact that different sensors behave differently. This means that some steps that you would need for your specific sensor may be missing. 
 * First, note down the LoRa EUI of the sensor.
-* ~~The steps below only apply to manual device registration. For a more up-to-date guide take a look at [automatic device registration](AUTO-DEVREG.md).~~
-* ~~**NOTE** that if you do not want to use the automatic device registrator you must disable it in the configuration file of the UGCC.~~
 
 #### Generate a UUID
 * A UUID is required to register a device at the uBirch backend, this UUID can be generated from its EUI using the `uuidgen.py` script contained in this repository. It can simply be executed with python and will ask for the device EUI, after that it will print out the UUID
@@ -377,8 +377,7 @@ Namespace: myNamespace -> ubirch / 275a51d0-25b7-5c7e-9af7-2b65ba75dd70 -> 041f9
 DevEUI (will be auto-lowercased) > 70b3d54a00000abc
 UUID: 10555cb5-42ad-5d62-8b2f-95c022b16cf2
 ```
-* **Note** that the EUI will be auto-lowercased
-
+* **Note** that the EUI will be auto-lowercased before generating the UUID
 
 #### Device Registration at the uBirch Backend
 * The UUID can be used to register the device. Mind the uBirch backend environment used during configuring the [GoClient](#ubirch-goclient-configuration) and the [UGCC](#ubirch-goclient-configuration). For the `prod` env, the console URL would be https://console.prod.ubirch.com
@@ -389,11 +388,11 @@ UUID: 10555cb5-42ad-5d62-8b2f-95c022b16cf2
 * Now you will have to create an application.
 * You should now be in the `DEVICES` of the application. Click on the `+CREATE` button.
 * Enter a name for the new device, as well as a describtion and the device EUI.
-  * ~~If you intend to use the automatic device registrator you will have to provide extra informaiton using the description field, see [above](#use-the-automatic-device-registrator-recommended).~~
 * Chose the default device profile and make sure that both the `Disable frame-counter validation` and the `Device is disabled` boxes are not checked.
 * Press on the `CREATE DEVICE` button.
-* You will now have to manually set the `Application key` for your device, since Fludia sensors have an application key "burned in". This hard-coded key must be obtained from Fludia. Go to the `KEYS (OTAA)` tab and paste the key into the `Application key` field. Press on `SET DEVICE-KEYS`.
-* After switching to the `LORAWAN FRAMES` tab and reconnecting the Fludia sensor to the Lora-Link (**ATTENTION:** this will reset the calibration and you will have to re-calibrate the sensor. It is also possible to just wait for the sensor to send an measurement.) you should see something about a `Join Request` and `Join Accept`. Check the `ACTIVATION` tab, there should be some fields (`Device address`, `Network session key`, ...) with values that you can't edit.
+* Some sensors require manual setting of a static application key. If this is the case for you, set the application key using the `KEYS (OTAA)` tab. Paste the key into the `Application key` field. Do not forget to press `SET DEVICE-KEYS`.
+* Other sensors support setting an application key on them in some way. In this case you can generate the key in the `KEYS (OTAA)` tab and then apply it and copy it to the device.
+* After switching to the `LORAWAN FRAMES` tab and restarting the sensor (or making it send a LoRa join request in some other way) you should see something about a `Join Request` and `Join Accept`. Check the `ACTIVATION` tab, there should be some fields (`Device address`, `Network session key`, ...) with values that you can't edit.
 * **Note** that the log of the UGCC may now contain errors like the following:
 ```
 [2021-01-09 21:06:19,219]--[DEBUG   ]  Trying to process a message from 'application/2/device/xxxxxxxxxxxxxxxx/rx' ...
