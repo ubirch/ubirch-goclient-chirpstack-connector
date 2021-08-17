@@ -1,5 +1,5 @@
 # ubirch-goclient-chirpstack-connector
-The main function of the uBirch-GoClient-Chirpstack-Connector is forwarding data extracted out of LoRa messages published via. MQTT by ChirpStack to the uBirch-GoClient, but it also handles forwarding this data to other endpoints, namely [Fludia](https://fludia.com/?lang=en) and [re.alto](https://realto.io/).
+The main function of the uBirch-GoClient-Chirpstack-Connector is forwarding data extracted out of LoRa messages published via. MQTT by ChirpStack to the uBirch-GoClient, but it also handles forwarding this data to other endpoints, which have to be configured by making some slight modifications to the code.
 
 ## Run it
 ```
@@ -26,44 +26,38 @@ This is caused by the ability to add and update devices while running, see [Addi
 {
   "log": {
     "level": 10,
-    "file": "/dev/stdout",
+    "file": "/home/pi/ugcc.log",
     "format": "[%(asctime)s]--[%(levelname)-8s]  %(message)s",
     "maxBytes": 2000000.0,
     "backupCount": 3
   },
-  "devices": [],
-  "ubpass": {},
+  "devices": [
+    {
+      "deviceEUI": "SOME-EUI",
+      "deviceUUID": "UUID",
+      "deviceID": "someid"
+    }
+  ],
+  "ubpass": {
+    "UUID": "AUTH-TOKEN"
+  },
   "http": {
-    "timeout": 5,
+    "timeout": 10,
     "attempts": 3,
     "retryDelay": 3
   },
   "mqtt": {
-    "user": "SECRET",
-    "pass": "SECRET",
-    "host": "192.168.0.199",
+    "user": "USER",
+    "pass": "PASSWORD",
+    "host": "127.0.0.1",
     "port": 1883
   },
   "goClient": {
-    "url": "http://192.168.0.199:10000/"
+    "url": "http://127.0.0.1:10000/"
   },
-  "realto": {
-    "url": "https://ra-pz.azure-api.net/datacollector/ubirch/",
-    "subKey": "SECRET"
-  },
-  "fludia": {
-    "url": "https://fm430-api.fludia.com/v1/callback",
-    "user": "SECRET",
-    "pass": "SECRET"
-  },
-  "registrator": {
-    "enableRegistrator": true,
-    "goClientConfig": "/home/pi/ubirch_client/goclient.json",
-    "goClientService": "ubrich_client",
-    "registrationURL": "https://127.0.0.1/registrator",
-    "uBirchToken": "SECRET",
-    "chirpstackApiURL": "https://192.168.0.199:8080/api",
-    "chirpstackApiToken": "SECRET"
+  "exampleClient": {
+    "url": "https://example.client.com",
+    "pass": "myPa5s"
   }
 }
 ```
@@ -152,7 +146,6 @@ Example:
     {
       "deviceEUI": "xxxxxxxxxxxxxxxx",
       "deviceUUID": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
-      "roundsPkW": 70,
       "deviceID": "xxxxxxxx"
     },
     {
@@ -164,7 +157,6 @@ Example:
   #
   # deviceEUI: The LoRa EUI of the device.
   # deviceUUID: The UUID of the device.
-  # roundsPkW: Meter-specific
   # deviceID: ID of the meter
   #
 ```
@@ -187,7 +179,7 @@ Example:
 #### `http.timeout` / `UGCC_HTTP_TIMEOUT`
 ```
 Descr:  Timeout for HTTP-Post request attempts.
-        The default value is 5.
+        The default value is 10.
 Type:   int
 Examples:
 
@@ -211,7 +203,7 @@ Examples:
 #### `http.retryDelay` / `UGCC_HTTP_RETRY_DELAY`
 ```
 Descr:  The amount of seconds between HTTP-Post request attempts.
-        The default value is 3.
+        The default value is 5.
 Type:   int
 Examples:
 
@@ -230,7 +222,7 @@ Examples:
 
   "127.0.0.1"
   "localhost"
-  "123.654.789.0"
+  "192.168.178.1"
 ```
 
 #### `mqtt.port` / `UGCC_MQTT_PORT`
@@ -241,8 +233,8 @@ Type:   int
 Examples:
 
   1883
-  2000
-  1234
+  1884
+  8883
 ```
 
 #### `mqtt.user` / `UGCC_MQTT_USER`
@@ -271,156 +263,67 @@ Descr:  The URL of the uBirch Go-Client.
 Type:   str
 Example:
 
-  "http://localhost:8080/"
+  "http://localhost:10000/"
 ```
 
-### re.alto Configuration
-#### `realto.url` / `UGCC_REALTO_URL`
-```
-Descr:  The URL of the re.alto API.
-        NOTE that the trailing '/' must be included.
-Type:   str
-Example:
-
-  "https://reactor-poc.azure-api.net/collector/"
-```
-
-#### `realto.subKey` / `UGCC_REALTO_SUBKEY`
-```
-Descr:  The subscription key for the re.alto API.
-Type:   str
-Example:
-
-  "SUBKEY"
-```
-
-### Fludia Configuration
-#### `fludia.url` / `UGCC_FLUDIA_URL`
-```
-Descr:  The URL of the Fludia API.
-        NOTE that the trailing '/' must be removed.
-Type:   str
-Example:
-
-  "https://fm430-api.fludia.com/v1/callback"
-```
-
-#### `fludia.user` / `UGCC_FLUDIA_USER`
-```
-Descr:  The username to be used to authenticate to the Fludia API.
-Type:   str
-Example:
-
-  "username"
-```
-
-#### `fludia.pass` / `UGCC_FLUDIA_PASS`
-```
-Descr:  The password to be used to authenticate to the Fludia API.
-Type:   str
-Example:
-
-  "password123"
-```
-
-### Registrator Configuration
-#### `registrator.enableRegistrator` / `UGCC_ENABLE_REGISTRATOR`
-```
-THIS CURRENTLY HAS TO BE SET TO 'false' BECAUSE THE DEVICE REGISTTRATOR IS NOT WORKING
-Descr:  Enables or disables the device registrator
-Type:   bool
-Example:
-
-  true
-  false
-```
-
-#### `registrator.goClientConfig` / `UGCC_REGISTRATOR_GOCLIENTCONFIG`
-```
-Descr:  The Go-Client Configuration file path (absolute)
-Type:   str
-Example:
-
-  "/opt/goClient/config.json"
-```
-
-#### `registrator.goClientService` / `UGCC_REGISTRATOR_GOCLIENTSERVICE`
-```
-Descr:  The Go-Client service name
-Type:   str
-Example:
-
-  "ubirch_client"
-```
-
-#### `registrationURL` / `UGCC_REGISTRATOR_REGISTRATIONURL`
-```
-Descr:  The uBirch device registration URL (with formatting for env)
-Type:   str
-Example:
-
-  "https://placeholder.%s.ubirch.com"
-```
-
-#### `uBirchToken` / `UGCC_REGISTRATOR_UBIRCHTOKEN`
-```
-Descr:  The uBirch device registration token
-Type:   str
-Example:
-
-  "mXYeRqmaTx8l3WVtWN+Pmw=="
-```
-
-#### `chirpstackApiURL` / `UGCC_REGISTRATOR_CHIRPSTACKAPIURL`
-```
-Descr:  The Chirpstack API Url (without trailing /)
-Type:   str
-Example:
-
-  "https://127.0.0.1:8080/api"
-```
-
-#### `chirpstackApiToken` / `UGCC_REGISTRATOR_CHIRPSTACKAPITOKEN`
-```
-Descr:  The Chirpstack API Token
-Type:   str
-Example:
-
-  "TikGoa6AePAsSfIg68lurvuLTo6aAxGllKA5dOKbAROEcUvKcnw2d7j2aN1zyrn4GC25k7PDkojp"
-```
-
-## Data package structure
-
-The generated data package is in json format and has the following form and fields:
-```
-{
-    "device_properties":{
-        "deveui":"xxxxxxxxxxxxxxxx"
-    },
-    "meterId":"SomeID",
-    "payload_cleartext":"46000007000000000000",
-    "r_diff-10":0,
-    "r_diff-15":0,
-    "r_diff-5":0,
-    "reading":93,
-    "timestamp":"2020-08-06T12:44:02.083157+02:00",
-    "type":"uplink"
-}
-```
 ## Adding new devices
-There are two ways (currently only one since the automated device registrator is not working) of adding a new devices.
-**The first one** is archieved by directly modifying the `devices` and `ubpass` values in the configuration file. This requires restarting the UGCC afterwards.
-Besides that, you will also have to modify the configuration file of the uBirch GoClient and restart it.
-~~**The second one** works by registering a new device at Chirpstack and inject additional information in its description field. A detailed description can be found in the [Gateway Setup Guide](GATEWAY.md). The contents of the description field must represent a JSON object with the following structure:~~
+This can be done by directly modifying the `devices` and `ubpass` values in the configuration file and **restarting** the UGCC afterwards.
+Besides that, you will also have to modify the configuration file of the uBirch GoClient and **restart it**.
+
+## Adding new data backends
+To add a new data backend, a few additions and alterations have to done:
+
+### [config.py](src/config.py) 
+Define variables needed to work with your backend, i.e.: `exampleClientUrl`, `exampleClientPass` 
+
+```python
+# defining variables
+self.exampleClientUrl : str = None
+self.exampleClientPass : str = None
+```
+Load the variables from the config or env:
+```python
+self.exampleClientUrl = self._getValueConfigOrEnv(["exampleClient", "url"], "UGCC_EXAMPLECLIENT_URL", default=self.exampleClientUrl)
+self.log.debug("exampleClientUrl => %s" % self.exampleClientUrl)
+self.exampleClientPass = self._getValueConfigOrEnv(["exampleClient", "pass"], "UGCC_EXAMPLECLIENT_PASS", default=self.exampleClientPass)
+self.log.debug("exampleClientPass => len = %d" % len(self.exampleClientPass))
+```
+### [config.json](src/config.json)
+Add new configuration values for the backend, i.e.:
 ```json
 {
-  "eui": "XXXXXXXXXXXXXXXX",
-  "uuid": "XXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
-  "cr": 75,
-  "id": "SomeExampleID"
+  ...
+  "exampleClient": {
+    "url": "https://example.client.com",
+    "pass": "myPa5s"
+  },
+  ...
 }
 ```
-~~Everytime the UGCC recieved a message from Chirpstack it checks if it knows the devices from which the measurement originates. If it doesn't know the device, it will request the device object from Chirpstack, containing the description which in itself contains a JSON object as described above. The contained UUID will then be used to register the device at the uBirch-Backend. The registration process returns the uBirch-Device-Auth-Token which will be saved into the configuration along with all other values. The UGCC will also update the configuration of the Go-Client and restart it. After restarting the Go-Client generates a Keypair for the new device and sends the public key to the uBirch-Backend using the uBirch-Device-Auth-Token obtained earlier.~~
+### [exampleConnector.py](src/exampleConnector.py)
+Adapt the example connector to fit your needs. This will mainly consist of changing the file name, the class name, log messages and adapting other details like how the URL is assembled. Alterations to the data itself should be kept minimal, since the connector should only handle sending. One thing that cannot be modified is that the connector class needs a function called `sendData` with the following signature:
+```
+def sendData(self, data : str, device : devices.Device)
+```
+The `data` parameter contains the JSON object created by the message processor (see `mkDataPacket()` in [messageProcessor.py](src/messageProcessor.py)) dumped into a string. The `device` parameter is the device object of the device that sent the message to which the data corresponds. See [devices.py](src/devices.py) for its members. If the send functions needs more information than can be delivered by the two parameters, consider passing those information to the class when initializing it.
+### [main.py](src/main.py)
+Import the new conncetor:
+```python
+import exampleConnector
+```
+Initialize the connector:
+```python
+self.exampleConnector = exampleConnector.ExampleConnector(
+    self.config.exampleClientUrl, self.config.exampleClientPass, self.http, self.log
+)
+```
+Add the new connector to the endpoint list:
+```python
+self.endpoints = [
+    ["uBirch go-client", self.goClientConnector.sendData],
+    ["example client", self.exampleConnector.sendData]
+]
+```
 
 ## Verification
 To verify the data, got to [ubirch colsole](https://console.prod.ubirch.com/verification/json) and enter the base64 encoded hash of the data.

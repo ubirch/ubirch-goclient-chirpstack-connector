@@ -367,16 +367,18 @@ sudo systemctl enable ugcc
 
 #### Generate a UUID
 * A UUID is required to register a device at the uBirch backend, this UUID can be generated from its EUI using the `uuidgen.py` script contained in this repository. It can simply be executed with python and will ask for the device EUI, after that it will print out the UUID
+* The namespace can be modified in [uuidgen.py](src/uuidgen.py)
 ```
 python3.8 uuidgen.py
 ```
 ```
 |===== UUID Generator =====|
-Namespace: eon.uuid.trustservice -> ubirch / ee2a7eee-4ae4-577a-a647-07877df38198 -> e7ab97ca-20fd-597e-a0e4-3e0b41a1a664
-DevEUI > aaaaaaaaaaaaaaaa
-UUID: 5dfe791d-7289-5067-99c5-d6d0a1909a54
+Namespace: myNamespace -> ubirch / 275a51d0-25b7-5c7e-9af7-2b65ba75dd70 -> 041f90e1-18e1-5ab4-a553-3985fe618ef6
+DevEUI (will be auto-lowercased) > 70b3d54a00000abc
+UUID: 10555cb5-42ad-5d62-8b2f-95c022b16cf2
 ```
 * **Note** that the EUI will be auto-lowercased
+
 
 #### Device Registration at the uBirch Backend
 * The UUID can be used to register the device. Mind the uBirch backend environment used during configuring the [GoClient](#ubirch-goclient-configuration) and the [UGCC](#ubirch-goclient-configuration). For the `prod` env, the console URL would be https://console.prod.ubirch.com

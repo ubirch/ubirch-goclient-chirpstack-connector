@@ -5,12 +5,11 @@ import config
 
 
 class Device():
-  def __init__(self, eui : str, uuid : str, passwd : str, roundsPkW : int, deviceID : str):
+  def __init__(self, eui : str, uuid : str, passwd : str, deviceID : str):
     """ init function of the device class """
     self.eui = eui
     self.uuid = uuid
     self.passwd = passwd
-    self.roundsPkW = roundsPkW
     self.id = deviceID
 
     return
@@ -46,7 +45,6 @@ class Devices():
         # there can only be one device with the EUI; index 0 can be assumed
         devices[0].uuid = rawDevice.get("deviceUUID")
         devices[0].passwd = ubPass
-        devices[0].roundsPkW = rawDevice.get("roundsPkW")
         devices[0].id = rawDevice.get("deviceID")
       else:
         self.log.debug("Adding a new device with EUI='%s' ..." % rawDevice.get("deviceEUI"))
@@ -55,7 +53,6 @@ class Devices():
           rawDevice.get("deviceEUI"),
           rawDevice.get("deviceUUID"),
           ubPass,
-          rawDevice.get("roundsPkW"),
           rawDevice.get("deviceID")
         ))
 

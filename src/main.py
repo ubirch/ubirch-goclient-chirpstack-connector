@@ -11,10 +11,7 @@ import devices
 import messageProcessor
 import httpSend
 import goClientConnector
-import fludiaAPIConnector
-import realtoConnector
-import deviceRegistrator
-
+import exampleConnector
 
 # get the config and log file path
 CONFIGFILE = os.getenv("UGCC_CONFIG_FILE", "../config.json")
@@ -73,31 +70,20 @@ class Main():
 
     # initialise the go-client connector
     self.goClientConnector = goClientConnector.GoClientConnector(
-      self.config.goClientUrl, self.devices, self.http, self.log
+      self.config.goClientUrl, self.http, self.log
     )
 
-    # initialise the fludia api connector
-    self.fludiaApiConnector = fludiaAPIConnector.FludiaAPIConnector(
-      self.config.fludiaUrl, self.config.fludiaUser, self.config.fludiaPass, self.http, self.log
-    )
-
-    # initalise the realto api connector
-    self.realtoApiConnector = realtoConnector.RealtoConnector(
-      self.config.realToUrl, self.config.realToSubKey, self.http, self.log
+    '''ADD HERE: custom connector'''
+    # initialize exampleConnector
+    self.exampleConnector = exampleConnector.ExampleConnector(
+      self.config.exampleClientUrl, self.config.exampleClientPass, self.http, self.log
     )
 
     # create an array of endpoints
     self.endpoints = [
       ["uBirch go-client", self.goClientConnector.sendData],
-      ["Fludia API", self.fludiaApiConnector.sendData],
-      ["re.alto API", self.realtoApiConnector.sendData]
+      ["example client", self.exampleConnector.sendData]
     ]
-
-    if self.config.enableRegistrator:
-      # initialise the device registrator
-      self.deviceRegistrator = deviceRegistrator.DeviceRegistrator(
-        self.config, self.http, self.log
-      )
 
     # initialise/run the MQTTReceiver (BLOCKING)
     self.mqttReceiver = mqttReceiver.MQTTReceiver(
@@ -131,28 +117,9 @@ class Main():
         device = self.devices.getDeviceByEUI(eui)
 
         if not device:
-          if self.config.enableRegistrator == True:
-            # the device is unknown; start the registration process
-            self.log.debug("Unknown device EUI ('%s')! Starting the device registration process ..." % eui)
+          self.log.warning("Unknown device EUI ('%s')!" % eui)
 
-            with self.deviceRegistrator.lock:
-              if self.deviceRegistrator.registerDevice(eui) == False:
-                self.log.error("Failed to register the new device ('%s')!" % eui)
-              else:
-                # re-scan the device list
-                self.devices.initialiseDevices()
-
-                if self.devices.getDevlistLen() < 1:
-                  self.log.warning("No devices were found in the configuration file!")
-                else:
-                  self.log.debug("Found and added %d device(s) to the device list" % self.devices.getDevlistLen())
-
-                return
-          else:
-            # the device is unknown but device registration is disabled
-            self.log.warning("Unknown device EUI ('%s')! Device registration is disabled - ignoring message ..." % eui)
-            
-            return
+          return
 
         # try to create the data packet
         try:

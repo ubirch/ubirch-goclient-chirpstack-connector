@@ -32,19 +32,8 @@ class Config():
     self.mqttHost : str = "localhost"
     self.mqttPort : int = 1883
     self.goClientUrl : str = None
-    self.realToUrl : str = None
-    self.realToSubKey : str = None
-    self.fludiaUrl : str = None
-    self.fludiaUser : str = None
-    self.fludiaPass : str = None
-    self.goClientExec : str = None
-    self.enableRegistrator : bool = False
-    self.registratorGoClientConfig : str = ""
-    self.registratorGoClientService : str = ""
-    self.registratorRegistrationURL : str = ""
-    self.registratorUbirchToken : str = ""
-    self.registratorChirpstackApiURL : str = ""
-    self.registratorChirpstackApiToken : str = ""
+    self.exampleClientUrl : str = None
+    self.exampleClientPass : str = None
 
     # try to open the config file
     self.log.debug("Trying to open config file '%s' ..." % self.configFile)
@@ -103,30 +92,10 @@ class Config():
       self.log.debug("mqttPort => %d" % self.mqttPort)
       self.goClientUrl = self._getValueConfigOrEnv(["goClient", "url"], "UGCC_GOCLIENT_URL", default=self.goClientUrl)
       self.log.debug("goClientUrl => %s" % self.goClientUrl)
-      self.realToUrl = self._getValueConfigOrEnv(["realto", "url"], "UGCC_REALTO_URL", default=self.realToUrl)
-      self.log.debug("realToUrl => %s" % self.realToUrl)
-      self.realToSubKey = self._getValueConfigOrEnv(["realto", "subKey"], "UGCC_REALTO_SUBKEY", default=self.realToSubKey)
-      self.log.debug("realToSubKey => len = %d" % len(self.realToSubKey))
-      self.fludiaUrl = self._getValueConfigOrEnv(["fludia", "url"], "UGCC_FLUDIA_URL", default=self.fludiaUrl)
-      self.log.debug("fludiaUrl => %s" % self.fludiaUrl)
-      self.fludiaUser = self._getValueConfigOrEnv(["fludia", "user"], "UGCC_FLUDIA_USER", default=self.fludiaUser)
-      self.log.debug("fludiaUser => %s" % self.fludiaUser)
-      self.fludiaPass = self._getValueConfigOrEnv(["fludia", "pass"], "UGCC_FLUDIA_PASS", default=self.fludiaPass)
-      self.log.debug("fludiaPass => len = %d" % len(self.fludiaPass))
-      self.enableRegistrator = self._getValueConfigOrEnv(["registrator", "enableRegistrator"], "UGCC_ENABLE_REGISTRATOR", default=self.enableRegistrator, convertFunc=bool)
-      self.log.debug("enableRegistrator => %s" % str(self.enableRegistrator))
-      self.registratorGoClientConfig = self._getValueConfigOrEnv(["registrator", "goClientConfig"], "UGCC_REGISTRATOR_GOCLIENTCONFIG", default=self.registratorGoClientConfig)
-      self.log.debug("registratorGoClientConfig => %s" % self.registratorGoClientConfig)
-      self.registratorGoClientService = self._getValueConfigOrEnv(["registrator", "goClientService"], "UGCC_REGISTRATOR_GOCLIENTSERVICE", default=self.registratorGoClientService)
-      self.log.debug("registratorGoClientService => %s" % self.registratorGoClientService)
-      self.registratorRegistrationURL = self._getValueConfigOrEnv(["registrator", "registrationURL"], "UGCC_REGISTRATOR_REGISTRATIONURL", default=self.registratorRegistrationURL)
-      self.log.debug("registratorRegistrationURL => %s" % self.registratorRegistrationURL)
-      self.registratorUbirchToken = self._getValueConfigOrEnv(["registrator", "uBirchToken"], "UGCC_REGISTRATOR_UBIRCHTOKEN", default=self.registratorUbirchToken)
-      self.log.debug("registratorUBirchToken => len = %d" % len(self.registratorUbirchToken))
-      self.registratorChirpstackApiURL = self._getValueConfigOrEnv(["registrator", "chirpstackApiURL"], "UGCC_REGISTRATOR_CHIRPSTACKAPIURL", default=self.registratorChirpstackApiURL)
-      self.log.debug("registratorChirpstackApiURL => %s" % self.registratorChirpstackApiURL)
-      self.registratorChirpstackApiToken = self._getValueConfigOrEnv(["registrator", "chirpstackApiToken"], "UGCC_REGISTRATOR_CHIRPSTACKAPITOKEN", default=self.registratorChirpstackApiToken)
-      self.log.debug("registratorChirpstackApiToken => len = %d" % len(self.registratorChirpstackApiToken))
+      self.exampleClientUrl = self._getValueConfigOrEnv(["exampleClient", "url"], "UGCC_EXAMPLECLIENT_URL", default=self.exampleClientUrl)
+      self.log.debug("exampleClientUrl => %s" % self.exampleClientUrl)
+      self.exampleClientPass = self._getValueConfigOrEnv(["exampleClient", "pass"], "UGCC_EXAMPLECLIENT_PASS", default=self.exampleClientPass)
+      self.log.debug("exampleClientPass => len = %d" % len(self.exampleClientPass))
     except:
       return False
 

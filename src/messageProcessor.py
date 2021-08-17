@@ -24,6 +24,8 @@ class MessageProcessor():
     payload = self.getMessagePayload(message)
 
     if not payload:
+      self.log.error("Error getting payload from the message!")
+
       return None
 
     # get the uplink id
@@ -36,6 +38,8 @@ class MessageProcessor():
     data = self.decodeData(payload["data"])
 
     if not data:
+      self.log.error("Error decoding application data!")
+
       return None
 
     self.log.debug("Data for uplinkID='%s': '%s'" % (uplinkID, str(data)))
@@ -50,30 +54,17 @@ class MessageProcessor():
 
       return None
 
-    self.log.debug("Found a matching device for EUI '%s' with UUID '%s', ID '%s' and kWh/Rot=%d" % (device.eui, device.uuid, device.id, device.roundsPkW))
-
-    # get the total amount of Wh
-    totalWh = self.roundsToWh(data["totalRot"], device.roundsPkW)
-    totalWh_1 = self.roundsToWh(data["lastDiff1"], device.roundsPkW)
-    totalWh_2 = self.roundsToWh(data["lastDiff2"], device.roundsPkW)
-    totalWh_3 = self.roundsToWh(data["lastDiff3"], device.roundsPkW)
+    self.log.debug("Found a matching device for EUI '%s' with UUID '%s'" % (device.eui, device.uuid))
 
     # get the time in rfc3339 format
     time = datetime.datetime.now(datetime.timezone.utc).astimezone().isoformat()
 
     # assemble the packet
     dpkt = {
-      "device_properties": {
-        "deveui": device.eui
-      },
-      "meterId": device.id,
-      "reading": totalWh,
-      "r_diff-5": totalWh_1,
-      "r_diff-10": totalWh_2,
-      "r_diff-15": totalWh_3,
+      "deveui": device.eui,
+      "deviceId": device.id,
       "timestamp": time,
-      "payload_cleartext": data["rawBytes"],
-      "type":"uplink"
+      "data": data
     }
 
     return dpkt
@@ -100,67 +91,22 @@ class MessageProcessor():
 
     self.log.debug("Data bytes: '%s'" % str(dataBytes))
 
-    totalRot = 0
-    lastDiff1 = 0 # the difference from the last measurement to the current one
-    lastDiff2 = 0 # the difference from the measurement before the last one to the last one
-    lastDiff3 = 0 # the difference from the measurement before before the last one to the one before the last one
-
-    #           DATA LAYOUT
-    #
-    # b[0:0] -> MsgType
-    # b[1:3] -> Total value
-    # b[4:5] -> Difference between 10min ago and 15min ago
-    # b[6:7] -> Difference between 5min ago and 10min ago
-    # b[8:0] -> Difference between 0min ago and 5min ago
-    #
-    # If the message is 10 bytes long, it will look like above.
-    # If the message is 08 bytes long, the difference between 10 and 15 minutes ago will miss.
-    # If the message is 06 bytes long, ...
-    # ...
-    #
-
-    # there are four valid data lens
-    dataLen = len(dataBytes)
-
-    try:
-      if 4 <= dataLen <= 10:
-        # totalWh is a three byte integer
-        totalRot = dataBytes[1] << 16 | dataBytes[2] << 8 | dataBytes[3]
-
-        if dataLen > 4:
-          # lastDiff1 is a two byte integer
-          lastDiff1 = dataBytes[4] << 8 | dataBytes[5]
-
-          if dataLen > 6:
-            # lastDiff2 is a two byte integer
-            lastDiff2 = lastDiff1
-            lastDiff1 = dataBytes[6] << 8 | dataBytes[7]
-
-            if dataLen > 8:
-              # lastDiff3 is a two byte integer
-              lastDiff3 = lastDiff2
-              lastDiff2 = lastDiff1
-              lastDiff1 = dataBytes[8] << 8 | dataBytes[9] 
-      else:
-        self.log.error("Error invalid application data length: '%d'" % dataLen)
-        
-        return None
-    except IndexError as e:
-        self.log.error("Error invalid application data length: '%d'" % dataLen)
-        self.log.exception(e)
-
-        return None
-
+    '''
+    ADD HERE: custom data parsing.
+    '''
+    byte1 = dataBytes[0]
+    byte2 = dataBytes[1]
+    byte3 = dataBytes[2]
+    byte4 = dataBytes[3]
+    
     return {
       "rawBytes": "".join(format(x, "02x") for x in dataBytes), 
-      "totalRot": totalRot,
-      "lastDiff1": lastDiff1,
-      "lastDiff2": lastDiff2,
-      "lastDiff3": lastDiff3
+      "val1": byte1,
+      "val2": byte2,
+      "val3": byte3,
+      "val4": byte4
     }
 
-  def roundsToWh(self, rounds, roundsPkWh) -> int:
-    return int(rounds / (roundsPkWh / 1000))
 
   def _getValueFromDict(self, keyPath : list, currentObj : dict) -> object:
     """ this function gets an object from the config object: config[path[0]][path[1]][path[n]] """

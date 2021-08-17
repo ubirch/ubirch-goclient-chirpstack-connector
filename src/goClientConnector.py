@@ -7,10 +7,9 @@ import httpSend
 
 
 class GoClientConnector():
-  def __init__(self, url : str, devices : devices.Devices, http : httpSend.HttpSend, log : logging.Logger):
+  def __init__(self, url : str, http : httpSend.HttpSend, log : logging.Logger):
     """ init function of the GoClientConnector function """
     self.url = url
-    self.devices = devices
     self.http = http
     self.log = log
 
