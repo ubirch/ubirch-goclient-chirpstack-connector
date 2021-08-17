@@ -326,7 +326,7 @@ self.endpoints = [
 ```
 
 ## Verification
-To verify the data, got to [ubirch colsole](https://console.prod.ubirch.com/verification/json) and enter the base64 encoded hash of the data.
+To verify the data, got to [ubirch console](https://console.prod.ubirch.com/verification/json) and enter the base64 encoded hash of the data.
 
 ### Create a hash for verification
 To create a hash for verification, you can use the following python script:
