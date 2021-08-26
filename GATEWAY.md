@@ -19,6 +19,7 @@ It contains a step by step guide from setting up the OS itself over [Chirpstack]
     - [API Key generation](#api-key-generation)
   - [MQTT Configuration](#mqtt-configuration)
     - [Adjusting ChirpStack Configuration Files](#adjusting-chirpstack-configuration-files)
+    - [Debugging the MQTT messages](#debugging-the-MQTT-messages)
   - [UGCC Setup](#ugcc-setup)
     - [uBirch GoClient Installation](#ubirch-goclient-installation)
     - [uBirch GoClient Configuration](#ubirch-goclient-configuration)
@@ -33,22 +34,25 @@ It contains a step by step guide from setting up the OS itself over [Chirpstack]
 ***
 
 ## Gateway Preparation
-* The first thing to do is to connect all the antennas to the device. In the case of the [RAK7244C](https://docs.rakwireless.com/Product-Categories/WisGate/RAK7244C/Quickstart) there are four antennas. 1x GPS, 2x LTE and 1x LoRa. All the ports (USB, HDMI, Ethernet, Antennas, ...) are labeled in [here](https://docs.rakwireless.com/Product-Categories/WisGate/RAK7244/Datasheet/#rak7244c-2). The two LTE antennas have to be connected to hte lower two antenna ports. Now the LoRa antenna can only be connected to the upper left port, only leaving the upper right one for the GPS antenna. The Micro-SD card slot is located beneath the antenna ports. Remove the Micro-SD card if already inserted, it is needed for the next step.
+* The first thing to do is to connect all the antennas to the device. In the case of the [RAK7244C](https://docs.rakwireless.com/Product-Categories/WisGate/RAK7244C/Quickstart) there are four antennas. 1x GPS, 2x LTE and 1x LoRa. All the ports (USB, HDMI, Ethernet, Antennas, ...) are labeled in [here](https://docs.rakwireless.com/Product-Categories/WisGate/RAK7244/Datasheet/#rak7244c-2). The two LTE antennas have to be connected to the lower two antenna ports. Now the LoRa antenna can only be connected to the upper left port, only leaving the upper right one for the GPS antenna. The Micro-SD card slot is located beneath the antenna ports. Remove the Micro-SD card, if already inserted. It is needed for the next step.
 ***
 
 ## OS Setup
-* RAK provides an own variation of [Raspbian](https://www.raspbian.org/) with ChirpStack and all drivers needed for the LoRa, GPS and LTE modules pre-installed. It is strongly recommended to use this image. It can be **[downloaded here](https://docs.rakwireless.com/Product-Categories/WisGate/RAK7244C/Overview/)**. **Note** that the image contained in the ZIP archive must match your gateway model. You won't notice that you chose the wrong image immediately but only after a while when things like GPS aren't working.
+* RAK provides an own variation of [Raspbian](https://www.raspbian.org/) with ChirpStack and all drivers needed for the LoRa, GPS and LTE modules pre-installed. It is strongly recommended using this image. It can be **[downloaded here](https://docs.rakwireless.com/Product-Categories/WisGate/RAK7244C/Overview/)**. **Note** that the image, contained in the ZIP archive, must match your gateway model. You won't notice that you chose the wrong image immediately, but only after a while when things like GPS aren't working.
 
 ### OS Installation
 * After unpacking the ZIP file, the contained `.img` file can be flashed onto the Micro-SD card. On Linux systems, the `.img` can be flashed like this:
 ```sh
 sudo dd if=IMAGE_NAME.img status=progress of=/dev/mmcblk0
 ```
-* Of course, `/dev/mmcblk0` is just the path to the Micro-SD card on my system. It may vary on yours; make sure you use the correct path, because you might accidentially overwrite data on other devices.
+> **NOTE: This command can accidentally overwrite data on your hard-drive or other connected devices and should be used carefully. 
+`/dev/mmcblk0` is just the path to the Micro-SD card on my system. It may vary on yours; make sure you use the correct path.**
+
+* As an alternative, you can use any software package, which is able to create bootable drives from Images. 
 
 ### OS Configuration
 * Insert the Micro-SD card and power on the device. The first boot will take a while (...), you can check the progress by connecting the gateway to your monitor with a HDMI-microHDMI cable. Continue once it reaches the login prompt.
-Now follow [the instructions provided in the official documentation of the RAK7244C](https://docs.rakwireless.com/Product-Categories/WisGate/RAK7244C/Quickstart/). You will need to SSH onto the gateway for the next step.
+Now follow [the instructions provided in the official documentation of the RAK7244C](https://docs.rakwireless.com/Product-Categories/WisGate/RAK7244C/Quickstart/). You will need to connect to the gateway via SSH for the next step.
 
 #### OS Update
 * **This step is very important** because the image provided by RAK currently (as of December 2020) comes with an outdated version of ChirpStack.
@@ -56,7 +60,7 @@ Now follow [the instructions provided in the official documentation of the RAK72
 ```sh
 sudo apt update && sudo apt upgrade
 ```
-* Reboot afer the update completed.
+* Reboot after the update completed.
 
 #### Firewall Setup
 * Services like the internal MQTT Server shouldn't be reachable from the outside when the gateway is run *in the wild*. Therefore a basic iptables setup is needed.
@@ -69,7 +73,7 @@ sudo iptables -A INPUT -p tcp --dport 8080 -j ACCEPT
 sudo iptables -A INPUT -p udp --dport 8080 -j ACCEPT
 sudo iptables -P INPUT DROP
 ```
-* This will only allow incoming connections on port `22` (SSH) and `8080` (Web Interface). You can replace `8080` with the value of your choice if you plan to change the WebInterface port later when configuring it (see [ChirpStack Configuration](#chirpstack-configuration)).Connections on other ports originating from existing connections are also accepted (i.e.: client connects to the Web Interface and the HTTP server moves the connection to port 43421).
+* This will only allow incoming connections on port `22` (SSH) and `8080` (Web Interface). You can replace `8080` with the value of your choice if you plan to change the WebInterface port later when configuring it (see [ChirpStack Configuration](#chirpstack-configuration)). Connections on other ports, originating from existing connections are also accepted (i.e.: client connects to the Web Interface and the HTTP server moves the connection to port 43421).
 The new list of rules can be viewed with the following command:
 ```sh
 sudo iptables -L -vn
@@ -100,19 +104,20 @@ sudo ip6tables -A INPUT -p tcp --dport 8080 -j ACCEPT
 sudo ip6tables -A INPUT -p udp --dport 8080 -j ACCEPT
 sudo ip6tables -P INPUT DROP
 ```
-* The `sudo ip6tables -L -vn` command will give almost the same output as above in the case of IPv4 with the only difference being the format of the IP addresses. These rules have to be made persistent. The propper way of doing this differs from distro to distro, but on Debian (which is the foundation of Raspbian, the system used in the image supplied by RAK) it can be done like this:
+* The `sudo ip6tables -L -vn` command will give almost the same output as above in the case of IPv4 with the only difference being the format of the IP addresses. These rules have to be made persistent. On Debian (which is the foundation of Raspbian, the system used in the image supplied by RAK) it can be done like this:
 ```sh
 sudo apt update && sudo apt install iptables-persistent
 ```
-* Now save the rules set above:
+* Now save the rules, set above:
 ```sh
 sudo su -c "iptables-save > /etc/iptables/rules.v4"
 sudo su -c "ip6tables-save > /etc/iptables/rules.v6"
 ```
-* Both of the files contents should now look like this:
+* Check the created files:
 ```sh
 cat /etc/iptables/rules.v4
 ```
+* Both file contents should now look like this:
 ```sh
 # Generated by xtables-save v1.8.2 on Thu Dec 17 11:47:04 2020
 *filter
@@ -133,7 +138,7 @@ COMMIT
 
 ## ChirpStack Configuration
 ### SSL Configuration
-* Navigate to the ChirpStack Application Server config directory and generate a SSL certificate and the private key. **Note** that configuring SSL will cause the WebServer to not work without SSL anymore. Besides that, using a self-signed certificate will lead to a warning being shown in most browsers.
+* Navigate to the ChirpStack Application Server config directory and generate a SSL certificate and the private key. **Note** that configuring SSL will cause the WebServer to not work without SSL anymore. Besides, using a self-signed certificate will lead to a warning, being shown in most browsers.
 ```sh
 sudo -i
 cd /etc/chirpstack-application-server
@@ -167,30 +172,30 @@ Client sent an HTTP request to an HTTPS server.
 ```
 
 ### Changing the JWT Secret + Port Configuration
-* The port on which the WebServer should listen can be changed in the same configuration file as used above (`/etc/chirpstack-application-server/chirpstack-application-server.toml`) by setting the `bind` option in the `application_server.external_api` section. The JWT secret is used for API authentication and it is strongly recommended to change it. The default value is `verysecret` and by definition a bad choice. The value can be set by changing the `jwt_secret` option in the `application_server.external_api` section. A good secret could be generated like this:
+* The port on which the WebServer should listen can be changed in the same configuration file as used above (`/etc/chirpstack-application-server/chirpstack-application-server.toml`), by setting the `bind` option in the `application_server.external_api` section. The JWT secret is used for API authentication and **it is strongly recommended to change it**. The default value is `verysecret` and by definition a bad choice. The value can be set by changing the `jwt_secret` option in the `application_server.external_api` section. A good secret can be generated like this:
 ```sh
 openssl rand -base64 32
 ```
-* It could for example look like this:
+* It can for example look like this:
 ```toml
 jwt_secret="kxqExbs7wW6aGKkpKQF9batAyUu3Hy5XQuRYC3mzVZs="
 ```
 ***
 
 ### Configuration in the WebInterface
-* Basic configuration is quite intuitive and you can edit/create users, organisations and so on.
-* **Important**: Enable Gateway Metadata and Network Geolocation in the default service profile under service profile. If you add new profiles, also enable those settings there. This will make Chirpstack add additional information like the receive signal quality or it's current GPS location to each sensor message it published via MQTT. The UGCC will then be able to use these information.
+* The basic configuration is quite intuitive. You can edit/create users, organisations and so on.
+* **Important**: Enable the Gateway Metadata and Network Geolocation in the default service profile under service profile. If you add new profiles, also enable those settings there. Thus, Chirpstack will provide additional information, like the receive signal quality or it's current GPS location to each sensor message and publish them via MQTT. The UGCC will then be able to use these information.
 * You can delete default Applications and Devices
 * One thing that you might have to do to make Chirpstack work is delete the default gateway and create a new one
   * Go to Gateways and delete the default one
-  * Create a new Gateway. You can chose everything as you will except for the GatewayID. You can get the ID by running the `gateway-version` command on the gateway.
+  * Create a new Gateway. You can choose everything as you will except for the GatewayID. You can get the ID by running the `gateway-version` command on the gateway.
 * Further information on the WebInterface can be obtained via [ChirpStacks official documentation](https://www.chirpstack.io/application-server/).
 
 ### API Key generation
 * If you plan to use the "automated" device registrator (currently not working, but the key can still be used to register the device at the Chirpstack API with the Chirpstack-Api-Tool), you will have to generate an API token. Log into your Chirpstack instance (default credentials: `admin`:`admin`), go to the API tab and create a new key. **Note** that the key will only be shown once and you won't be able to access it after leaving the page. Note it down somewhere.
 
 ## MQTT Configuration
-* ChirpStack publishes most of its internal events on MQTT. This is used by the UGCC to get device messages and process them. The MQTT server used in this case is [Moquitto](https://mosquitto.org/). By default, it does not require any authentication which might not be optimal. Therefore, a user + password should be configured.
+* ChirpStack publishes most of its internal events on MQTT. This is used by the UGCC to get device messages and process them. In this case the MQTT server is based on [Moquitto](https://mosquitto.org/). By default, it does not require any authentication which might not be optimal. Therefore, a user + password should be configured.
 ```sh
 sudo mosquitto_passwd -c /etc/mosquitto/passwd user
 ```
@@ -229,6 +234,7 @@ sudo systemctl status chirpstack-application-server
 sudo systemctl status chirpstack-network-server
 sudo systemctl status chirpstack-gateway-bridge
 ```
+### Debugging the MQTT messages
 * If you wan't to connect to the MQTT server for debug work, use the following command:
 ```sh
 mosquitto_sub -h HOST -v -t "#" -u user -P PASS
@@ -359,17 +365,17 @@ sudo systemctl daemon-reload
 sudo systemctl start ugcc
 sudo systemctl enable ugcc
 ```
-* A special characteristic of the UGCC is that it will log to the normal Systemd log before loading the configuration file and then it will start logging to the specified log file
+* A special characteristic of the UGCC is that it will log to the normal Systemd log before loading the configuration file and afterwards start logging to the specified log file.
 
 ### Sensor Setup
-* **Important:** This is only a rough guideline on how to setup a sensor. This is caused by the fact that different sensors behave differently. This means that some steps that you would need for your specific sensor may be missing. 
+* **Important:** This is only a rough guideline on how to setup a sensor. This is due to the fact that different sensors behave differently. This means that some steps that you would need for your specific sensor may be missing. 
 * First, note down the LoRa EUI of the sensor.
 
 #### Generate a UUID
-* A UUID is required to register a device at the uBirch backend, this UUID can be generated from its EUI using the `uuidgen.py` script contained in this repository. It can simply be executed with python and will ask for the device EUI, after that it will print out the UUID
+* A UUID is required to register a device at the uBirch backend, this UUID can be generated from its EUI using the `uuidGenerator.py` script contained in this repository. It can simply be executed with python and will ask for the device EUI, after that it will print out the UUID
 * The namespace can be modified in [uuidgen.py](src/uuidgen.py)
 ```
-python3.8 uuidgen.py
+python3 uuidGenerator.py
 ```
 ```
 |===== UUID Generator =====|
@@ -380,15 +386,15 @@ UUID: 10555cb5-42ad-5d62-8b2f-95c022b16cf2
 * **Note** that the EUI will be auto-lowercased before generating the UUID
 
 #### Device Registration at the uBirch Backend
-* The UUID can be used to register the device. Mind the uBirch backend environment used during configuring the [GoClient](#ubirch-goclient-configuration) and the [UGCC](#ubirch-goclient-configuration). For the `prod` env, the console URL would be https://console.prod.ubirch.com
+* The UUID can be used to register the device. Keep in mind, to use the same uBirch backend environment, which was used during the configuration of the [GoClient](#ubirch-goclient-configuration) and the [UGCC](#ubirch-goclient-configuration). For the `prod` env, the console URL would be [https://console.prod.ubirch.com](https://console.prod.ubirch.com)
 
 #### Device Registration at the ChirpStack WebInterface
 * Detailed information about ChirpStack [applications](https://www.chirpstack.io/application-server/use/applications/) and [devices](https://www.chirpstack.io/application-server/use/devices/) can be found in the official documentation.
 * To increase your rate of success, you can go to the `Device-profiles` tab, edit the default device profile, and set the `LoRaWAN MAC version` option in the `GENERAL` tab to `1.0.0`.
 * Now you will have to create an application.
 * You should now be in the `DEVICES` of the application. Click on the `+CREATE` button.
-* Enter a name for the new device, as well as a describtion and the device EUI.
-* Chose the default device profile and make sure that both the `Disable frame-counter validation` and the `Device is disabled` boxes are not checked.
+* Enter a name for the new device, as well as a description and the device EUI.
+* Choose the default device profile and make sure that both the `Disable frame-counter validation` and the `Device is disabled` boxes are deactivated.
 * Press on the `CREATE DEVICE` button.
 * Some sensors require manual setting of a static application key. If this is the case for you, set the application key using the `KEYS (OTAA)` tab. Paste the key into the `Application key` field. Do not forget to press `SET DEVICE-KEYS`.
 * Other sensors support setting an application key on them in some way. In this case you can generate the key in the `KEYS (OTAA)` tab and then apply it and copy it to the device.
