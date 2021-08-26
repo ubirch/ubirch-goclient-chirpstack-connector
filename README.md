@@ -1,5 +1,5 @@
 # ubirch-goclient-chirpstack-connector
-The main function of the uBirch-GoClient-Chirpstack-Connector is forwarding data extracted out of LoRa messages published via. MQTT by ChirpStack to the uBirch-GoClient, but it also handles forwarding this data to other endpoints, which have to be configured by making some slight modifications to the code.
+The main function of the uBirch-GoClient-Chirpstack-Connector is forwarding data, extracted out of LoRa messages published via. MQTT by ChirpStack, to the uBirch-GoClient. It can also handle forwarding this data to other endpoints, which have to be configured by making some slight modifications to the code.
 
 ## Run it
 ```
@@ -10,13 +10,11 @@ python3.8 src/main.py
 0. Python 3.8+
 1. A running instance of [ChirpStack](https://chirpstack.io)
 2. A running instance of the [uBirch go-client](https://github.com/ubirch/ubirch-client-go)
-3. Access data for the [Fludia](https://fludia.com/?lang=en) API
-4. Access data for the [re.alto](https://realto.io/) API
 
-* If you are using a RAK7244C gateway to set up the UGCC, you can follow [this](GATEWAY.md) guide
+* If you are using a RAK7244C gateway to set up the UGCC, you can follow [this](GATEWAY.md) guide.
 
 ## Configuration
-All configuration values can be set via the environment or a configuration file which you will have to create. The default path for the configuration file is the folder above the current directory (the UGCC will look for it in the directory above the one it is started from). This can be changed by setting the `UGCC_CONFIG_FILE` environment variable. It is recommended to use absolute paths. `UGCC_` is a prefix for all environment variables used by the UGCC. It generally is *not* recommended to use environment variables and values from the configuration file have a higher priority. Injecting the following values via the environment might even cause the program to crash:
+All configuration values can be set via the environment or a configuration file, which you will have to create. The default path for the configuration file is the folder above the current directory (the UGCC will look for it in the directory above the one it is started from). This can be changed by setting the `UGCC_CONFIG_FILE` environment variable. It is recommended to use absolute paths. `UGCC_` is a prefix for all environment variables used by the UGCC. In general, it is *not* recommended to use environment variables, since values from the configuration file have a higher priority. Injecting the following values via the environment might even cause the program to crash:
 ```
 config.devices (UGCC_DEVICES)
 config.ubpass (UGCC_UBPASS)
@@ -157,7 +155,7 @@ Example:
   #
   # deviceEUI: The LoRa EUI of the device.
   # deviceUUID: The UUID of the device.
-  # deviceID: ID of the meter
+  # deviceID: ID of the device. This can be used to have a readable identifier.
   #
 ```
 
@@ -271,10 +269,10 @@ This can be done by directly modifying the `devices` and `ubpass` values in the 
 Besides that, you will also have to modify the configuration file of the uBirch GoClient and **restart it**.
 
 ## Adding new data backends
-To add a new data backend, a few additions and alterations have to done:
+To add a new data backend, a few additions and alterations have to be done:
 
 ### [config.py](src/config.py) 
-Define variables needed to work with your backend, i.e.: `exampleClientUrl`, `exampleClientPass` 
+Define variables, needed to work with your backend, i.e.: `exampleClientUrl`, `exampleClientPass` 
 
 ```python
 # defining variables
@@ -305,7 +303,7 @@ Adapt the example connector to fit your needs. This will mainly consist of chang
 ```
 def sendData(self, data : str, device : devices.Device)
 ```
-The `data` parameter contains the JSON object created by the message processor (see `mkDataPacket()` in [messageProcessor.py](src/messageProcessor.py)) dumped into a string. The `device` parameter is the device object of the device that sent the message to which the data corresponds. See [devices.py](src/devices.py) for its members. If the send functions needs more information than can be delivered by the two parameters, consider passing those information to the class when initializing it.
+The `data` parameter contains the JSON object created by the message processor (see `mkDataPacket()` in [messageProcessor.py](src/messageProcessor.py)) dumped into a string. The `device` parameter is the device object of the device that sent the message, to which the data corresponds. See [devices.py](src/devices.py) for its members. If the send functions needs more information, than can be delivered by the two parameters, consider passing those information to the class, when initializing it.
 ### [main.py](src/main.py)
 Import the new conncetor:
 ```python
@@ -339,7 +337,7 @@ To create a hash for verification, you can use the following python script:
 b'irjr79EU//D3ex0SZI+r9G8chBiEPefk62u+DCzOLlE='
 >>> 
 ```
-Now copy the output from the last line (e.g: `irjr79EU//D3ex0SZI+r9G8chBiEPefk62u+DCzOLlE=`) and paste it to the verification field.
+Now copy the output from the last line (e.g.: `irjr79EU//D3ex0SZI+r9G8chBiEPefk62u+DCzOLlE=`) and paste it to the verification field.
 If you do not have an account at ubirch, set one up, or use curl:
 ```
 curl -d 'juujpm23LNbltrKqRtRH+0V9pMnbZ2HABGUNgFrM/KY=' https://verify.demo.ubirch.com/api/upp/verify
