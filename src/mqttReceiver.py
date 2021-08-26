@@ -4,13 +4,11 @@ import time
 import logging
 import sys
 
-import config
-
 
 class MQTTReceiver():
-  def __init__(self, host : str, port : int, user : str, passwd : str, messageCb : Callable, log : logging.Logger):
+  def __init__(self, host: str, port: int, user: str, passwd: str, messageCb: Callable, log: logging.Logger):
     """ init function of the MQTTReceiver class """
-    self.mqttClient : mqtt.Client = None
+    self.mqttClient: mqtt.Client = None
     self.log = log
     self.messageCB = messageCb
 
@@ -57,7 +55,7 @@ class MQTTReceiver():
       # break out of the connection loop
       break
 
-  def _onConnect(self, client : mqtt.Client, userdata, flags, status : int):
+  def _onConnect(self, client: mqtt.Client, userdata, flags, status: int):
     """ function to be registered as 'on_connect' callback """
     if status == 0:
       self.log.info("Connected to MQTT-Broker @ '%s:%d'" % (self.rhost, self.rport))
@@ -67,8 +65,8 @@ class MQTTReceiver():
       msg_id = self.mqttClient.subscribe("application/#", 2)
 
       if msg_id[0] == 0:
-        self.log.debug("Subscription ackknowledgement pending for request with mid=%s" % msg_id[1])
-      else :
+        self.log.debug("Subscription acknowledgement pending for request with mid=%s" % msg_id[1])
+      else:
         self.log.error("Failed to subscribe to 'application/#'! (%d)" % msg_id[0])
 
         sys.exit(-1)
@@ -79,7 +77,7 @@ class MQTTReceiver():
 
     return
 
-  def _onMessage(self, client, userdata, msg : mqtt.MQTTMessage):
+  def _onMessage(self, client, userdata, msg: mqtt.MQTTMessage):
     """ function to be registered as 'on_message' callback """
     self.log.debug("Received a message on '%s'" % msg.topic)
 
@@ -98,7 +96,7 @@ class MQTTReceiver():
 
     return
 
-  def _onSubscribe(self, client : mqtt.Client, userdata, msg_id, granted_qos):
+  def _onSubscribe(self, client: mqtt.Client, userdata, msg_id, granted_qos):
     """ function to be registered as 'on_subscribe' callback """
     self.log.debug("The MQTT-Broker granted a QoS=%d for the subscription request with mid=%d" % (granted_qos[0], msg_id))
 
