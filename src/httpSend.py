@@ -3,14 +3,14 @@ import logging
 import time
 
 class HttpSend():
-  def __init__(self, timeout : int, attempts : int, retryDelay : int, log : logging.Logger):
+  def __init__(self, timeout: int, attempts: int, retryDelay: int, log: logging.Logger):
     """ the init function of the HTTP class """
     self.timeout = timeout
     self.attempts = attempts
     self.retryDelay = retryDelay
     self.log = log
 
-  def httpSend(self, url : str, headers : dict, data : object, operation : str = "post", verify : bool = True) -> (int, str, str):
+  def httpSend(self, url: str, headers: dict, data: object, operation: str = "post", verify: bool = True) -> (int, str, str):
     """ sends a http request to a given url """
     # set the amount of attempts left
     attemptsLeft = self.attempts
