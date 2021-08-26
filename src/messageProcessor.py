@@ -1,6 +1,5 @@
 import json
 import base64
-import struct
 import datetime
 
 import devices
@@ -8,16 +7,15 @@ import log
 import mqttReceiver
 
 
-
 class MessageProcessor():
-  def __init__(self, devices : devices.Devices, log : log.logging.Logger):
+  def __init__(self, devices: devices.Devices, log: log.logging.Logger):
     """ init function of the MessageProcessor class """
     self.devices = devices
     self.log = log
 
     return
 
-  def mkDataPacket(self, message : mqttReceiver.mqtt.MQTTMessage) -> dict:
+  def mkDataPacket(self, message: mqttReceiver.mqtt.MQTTMessage) -> dict:
     """ this function creates a data packet (json) out of a message received via mqtt """
     # parse the mqtt payload (json)
     self.log.debug("Trying to parse the Json payload ...")
@@ -69,7 +67,7 @@ class MessageProcessor():
 
     return dpkt
 
-  def getMessagePayload(self, message : mqttReceiver.mqtt.MQTTMessage) -> dict:
+  def getMessagePayload(self, message: mqttReceiver.mqtt.MQTTMessage) -> dict:
     """ this function extracts the json payload out of the mqtt message """
     try:
       return json.loads(message.payload)
@@ -78,7 +76,7 @@ class MessageProcessor():
       self.log.exception(e)
       return None
 
-  def decodeData(self, data : str) -> dict:
+  def decodeData(self, data: str) -> dict:
     """ this function decodes the data and puts it into a json object """
     # remove base64 coding
     try:
@@ -108,7 +106,7 @@ class MessageProcessor():
     }
 
 
-  def _getValueFromDict(self, keyPath : list, currentObj : dict) -> object:
+  def _getValueFromDict(self, keyPath: list, currentObj: dict) -> object:
     """ this function gets an object from the config object: config[path[0]][path[1]][path[n]] """
     if len(keyPath) == 0 or not currentObj:
       return currentObj
