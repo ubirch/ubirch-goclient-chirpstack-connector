@@ -1,5 +1,4 @@
 import os
-import sys
 import json
 import shutil
 import logging
@@ -7,34 +6,34 @@ from typing import Callable
 
 
 class Config():
-  """ init function of the Config class """
-  def __init__(self, configFile : str, log : logging.Logger):
+  def __init__(self, configFile: str, log: logging.Logger):
+    """ init function of the Config class """
+    # set default values (None means that is has to be set)
     self.configFile = configFile
     self.log = log
-    self.config : dict = None
+    self.config: dict = None
     self.configFD = None
     self.backupPath = self.configFile + ".backup"
+    self.logLevel: int = 10
+    self.logFile: str = "/dev/stdout"
+    self.logFormat: str = "[%(asctime)s]--[%(levelname)-8s]  %(message)s"
+    self.logMaxBytes: int = 2e7
+    self.logBackupCount: int = 10
+    self.devices: list = []
+    self.ubPass: dict = None
+    self.httpTimeout: int = 5
+    self.httpAttempts: int = 3
+    self.httpRetryDelay: int = 3
+    self.mqttUser: str = None
+    self.mqttPass: str = None
+    self.mqttHost: str = "localhost"
+    self.mqttPort: int = 1883
+    self.goClientUrl: str = None
+    self.exampleClientUrl: str = None
+    self.exampleClientPass: str = None
 
   def readCfg(self) -> bool:
-    # set default values (None means that is has to be set)
-    self.logLevel : int = 10
-    self.logFile : str = "/dev/stdout"
-    self.logFormat : str = "[%(asctime)s]--[%(levelname)-8s]  %(message)s"
-    self.logMaxBytes : int = 2e7
-    self.logBackupCount : int = 10
-    self.devices : list = []
-    self.ubPass : dict = None
-    self.httpTimeout : int = 5
-    self.httpAttempts : int = 3
-    self.httpRetryDelay : int = 3
-    self.mqttUser : str = None
-    self.mqttPass : str = None
-    self.mqttHost : str = "localhost"
-    self.mqttPort : int = 1883
-    self.goClientUrl : str = None
-    self.exampleClientUrl : str = None
-    self.exampleClientPass : str = None
-
+    """Read the configuration"""
     # try to open the config file
     self.log.debug("Trying to open config file '%s' ..." % self.configFile)
 
@@ -115,6 +114,8 @@ class Config():
     with open(self.configFile, 'w') as fd:
       json.dump(self.config, fd, indent=2)
 
+    return True
+
   def revert(self) -> bool:
     """ loads the backup and overwrites the current coniguration """
     if os.path.exists(self.backupPath):
@@ -131,7 +132,7 @@ class Config():
 
       return False
 
-  def _getValueConfigOrEnv(self, keyPath : list, envName : str, default : object = None, convertFunc : Callable[[object], object] = None) -> object:
+  def _getValueConfigOrEnv(self, keyPath: list, envName: str, default: object = None, convertFunc: Callable[[object], object] = None) -> object:
     """ get a config value from the config file or environment """
     # try to get the value from the config file
     val = self._getValueFromDict(keyPath, self.config)
@@ -164,7 +165,7 @@ class Config():
 
     return val
 
-  def _getValueFromDict(self, keyPath : list, currentObj : dict) -> object:
+  def _getValueFromDict(self, keyPath: list, currentObj: dict) -> object:
     """ this function gets an object from the config object: config[path[0]][path[1]][path[n]] """
     if len(keyPath) == 0 or not currentObj:
       return currentObj
