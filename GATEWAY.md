@@ -38,7 +38,7 @@ It contains a step by step guide from setting up the OS itself over [Chirpstack]
 ***
 
 ## OS Setup
-* RAK provides an own variation of [Raspbian](https://www.raspbian.org/) with ChirpStack and all drivers needed for the LoRa, GPS and LTE modules pre-installed. It is strongly recommended using this image. It can be **[downloaded here](https://docs.rakwireless.com/Product-Categories/WisGate/RAK7244C/Overview/)**. **Note** that the image, contained in the ZIP archive, must match your gateway model. You won't notice that you chose the wrong image immediately, but only after a while when things like GPS aren't working.
+* RAK provides an own variation of [Raspbian](https://www.raspbian.org/) with ChirpStack and all drivers needed for the LoRa, GPS and LTE modules pre-installed. Using this image is strongly recommended. It can be **[downloaded here](https://docs.rakwireless.com/Product-Categories/WisGate/RAK7244C/Overview/)**. **Note** that the image, contained in the ZIP archive, must match your gateway model. You won't notice that you chose the wrong image immediately, but only after a while when things like GPS aren't working.
 
 ### OS Installation
 * After unpacking the ZIP file, the contained `.img` file can be flashed onto the Micro-SD card. On Linux systems, the `.img` can be flashed like this:
