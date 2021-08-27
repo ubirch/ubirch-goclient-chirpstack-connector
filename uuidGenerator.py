@@ -1,3 +1,8 @@
+"""
+Generate a UUID v5, based on a Namespace and the input string, which should be the devEUI.
+This script can be used to get the UUID of your device, which will be used at the ubirch backend.
+"""
+
 import uuid
 import src.uuidgen
 

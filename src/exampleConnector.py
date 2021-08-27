@@ -6,7 +6,7 @@ import httpSend
 
 
 class ExampleConnector():
-  def __init__(self, url : str, epass : str, http : httpSend.HttpSend, log : logging.Logger):
+  def __init__(self, url: str, epass: str, http: httpSend.HttpSend, log: logging.Logger):
     """ init function of the ExampleConnector class """
     self.url = url
     self.epass = epass
@@ -22,7 +22,7 @@ class ExampleConnector():
 
     self.log.info("The example API URL is '%s'" % self.url)
 
-  def sendData(self, data : str, device : devices.Device):
+  def sendData(self, data: str, device: devices.Device):
     """ this function sends measurements to the example api """
     status, reason, text = self.http.httpSend(self.url + device.uuid, self.headers, data)
 

@@ -1,13 +1,12 @@
 import logging
 import requests
-import json
 
 import devices
 import httpSend
 
 
 class GoClientConnector():
-  def __init__(self, url : str, http : httpSend.HttpSend, log : logging.Logger):
+  def __init__(self, url: str, http: httpSend.HttpSend, log: logging.Logger):
     """ init function of the GoClientConnector function """
     self.url = url
     self.http = http
@@ -15,7 +14,7 @@ class GoClientConnector():
 
     self.log.info("The go-client URL is '%s'" % self.url)
 
-  def sendData(self, data : str, device : devices.Device):
+  def sendData(self, data: str, device: devices.Device):
     """ this function sends measurements to the go client """
     if not device.passwd:
       self.log.error("No password configured for the device with the UUID '%s'" % device.uuid)

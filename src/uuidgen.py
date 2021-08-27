@@ -6,5 +6,5 @@ UBIRCH_NAMESPACE_NAME = "ubirch"
 UBIRCH_NAMESPACE_UUID = uuid.uuid5(NAMESPACE_UUID, UBIRCH_NAMESPACE_NAME)
 
 
-def getDevUUID(devEUI : str, autoLower : bool = True) -> uuid.UUID:
+def getDevUUID(devEUI: str, autoLower: bool = True) -> uuid.UUID:
   return uuid.uuid5(UBIRCH_NAMESPACE_UUID, devEUI if autoLower == False else devEUI.lower())

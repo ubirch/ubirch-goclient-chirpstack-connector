@@ -1,13 +1,12 @@
 import logging
 import logging.handlers
 from importlib import reload
-import os
 
 import config
 
-def setupLog(config : config.Config = None, initialLogger : bool = False):
+def setupLog(config: config.Config = None, initialLogger: bool = False):
   """ init function of the Log class """
-  log : logging.Logger = None
+  log: logging.Logger = None
 
   logfile = "/dev/stdout"
   loglevel = 10

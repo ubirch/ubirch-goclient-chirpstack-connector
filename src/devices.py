@@ -1,11 +1,9 @@
-import os
 import logging
-
 import config
 
 
 class Device():
-  def __init__(self, eui : str, uuid : str, passwd : str, deviceID : str):
+  def __init__(self, eui: str, uuid: str, passwd: str, deviceID: str):
     """ init function of the device class """
     self.eui = eui
     self.uuid = uuid
@@ -16,9 +14,9 @@ class Device():
 
 
 class Devices():
-  def __init__(self, config : config.Config, log : logging.Logger):
+  def __init__(self, config: config.Config, log: logging.Logger):
     """ init function of the devices class """
-    self.devices : [Device] = []
+    self.devices: [Device] = []
     self.config = config
     self.log = log
 
@@ -56,7 +54,7 @@ class Devices():
           rawDevice.get("deviceID")
         ))
 
-  def getDeviceByEUI(self, eui : str) -> Device:
+  def getDeviceByEUI(self, eui: str) -> Device:
     """ this function gets a device from self.devices by its eui """
     for device in self.devices:
       if device.eui.lower() == eui.lower():
@@ -64,7 +62,7 @@ class Devices():
 
     return None
 
-  def getDeviceByUUID(self, uuid : str) -> Device:
+  def getDeviceByUUID(self, uuid: str) -> Device:
     """ this function gets a device from self.devices by its uuid """
     for device in self.devices:
       if device.uuid.lower() == uuid.lower():
