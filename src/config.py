@@ -29,8 +29,8 @@ class Config():
     self.mqttHost: str = "localhost"
     self.mqttPort: int = 1883
     self.goClientUrl: str = None
-    self.exampleClientUrl: str = None
-    self.exampleClientPass: str = None
+    self.dataClientUrl: str = None
+    self.dataClientPass: str = None
 
   def readCfg(self) -> bool:
     """Read the configuration"""
@@ -91,10 +91,10 @@ class Config():
       self.log.debug("mqttPort => %d" % self.mqttPort)
       self.goClientUrl = self._getValueConfigOrEnv(["goClient", "url"], "UGCC_GOCLIENT_URL", default=self.goClientUrl)
       self.log.debug("goClientUrl => %s" % self.goClientUrl)
-      self.exampleClientUrl = self._getValueConfigOrEnv(["exampleClient", "url"], "UGCC_EXAMPLECLIENT_URL", default=self.exampleClientUrl)
-      self.log.debug("exampleClientUrl => %s" % self.exampleClientUrl)
-      self.exampleClientPass = self._getValueConfigOrEnv(["exampleClient", "pass"], "UGCC_EXAMPLECLIENT_PASS", default=self.exampleClientPass)
-      self.log.debug("exampleClientPass => len = %d" % len(self.exampleClientPass))
+      self.dataClientUrl = self._getValueConfigOrEnv(["dataClient", "url"], "UGCC_DATACLIENT_URL", default=self.dataClientUrl)
+      self.log.debug("dataClientUrl => %s" % self.dataClientUrl)
+      self.dataClientPass = self._getValueConfigOrEnv(["dataClient", "pass"], "UGCC_DATACLIENT_PASS", default=self.dataClientPass)
+      self.log.debug("dataClientPass => len = %d" % len(self.dataClientPass))
     except:
       return False
 
