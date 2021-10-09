@@ -60,7 +60,7 @@ class MessageProcessor():
 
     # assemble the packet
     dpkt = {
-      "deviceUuid": device.id,
+      "deviceUuid": device.uuid,
       "timestamp": time,
       "meterData": data
     }
