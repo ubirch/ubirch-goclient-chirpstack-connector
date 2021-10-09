@@ -45,7 +45,7 @@ class DataConnector():
 
     self.log.info("Added hashLink to data: %s" % str(datawhashlist))
 
-    status, reason, text = self.http.httpSend(self.url + device.uuid, self.headers, datawhashlist)
+    status, reason, text = self.http.httpSend(self.url + device.uuid, self.headers, str(datawhashlist))
 
     # check for success (201 is required to be accepted as success)
     if status == requests.codes.OK or status == 201:
