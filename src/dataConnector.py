@@ -18,7 +18,7 @@ class DataConnector():
     self.headers = {
       "Content-Type": "application/json",
       "Cache-Control": "no-cache",
-      "X-Auth-Token": self.dpass
+      "Ocp-Apim-Subscription-Key": self.dpass
     }
 
     self.log.info("The data API URL is '%s'" % self.url)
