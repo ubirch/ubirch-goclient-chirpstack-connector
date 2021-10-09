@@ -11,7 +11,7 @@ import devices
 import messageProcessor
 import httpSend
 import goClientConnector
-import exampleConnector
+import dataConnector
 
 # get the config and log file path
 CONFIGFILE = os.getenv("UGCC_CONFIG_FILE", "../config.json")
@@ -73,16 +73,15 @@ class Main():
       self.config.goClientUrl, self.http, self.log
     )
 
-    '''ADD HERE: custom connector'''
-    # initialize exampleConnector
-    self.exampleConnector = exampleConnector.ExampleConnector(
-      self.config.exampleClientUrl, self.config.exampleClientPass, self.http, self.log
+    # initialize dataConnector
+    self.dataConnector = dataConnector.DataConnector(
+      self.config.dataClientUrl, self.config.dataClientPass, self.http, self.log
     )
 
     # create an array of endpoints
     self.endpoints = [
       ["uBirch go-client", self.goClientConnector.sendData],
-      ["example client", self.exampleConnector.sendData]
+      ["data client", self.dataConnector.sendData]
     ]
 
     # initialise/run the MQTTReceiver (BLOCKING)
