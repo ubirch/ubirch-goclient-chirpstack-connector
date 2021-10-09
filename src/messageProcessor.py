@@ -31,8 +31,9 @@ class MessageProcessor():
 
     self.log.info("Processing a message with uplinkID='%s'" % uplinkID)
     
-    # take the base64 encoded data, decode it and put it into json format
+    # take the base64 encoded data and decode it
     self.log.debug("Trying to decode the application data ...")
+
     data = self.decodeData(payload["data"])
 
     if not data:
@@ -55,14 +56,13 @@ class MessageProcessor():
     self.log.debug("Found a matching device for EUI '%s' with UUID '%s'" % (device.eui, device.uuid))
 
     # get the time in rfc3339 format
-    time = datetime.datetime.now(datetime.timezone.utc).astimezone().isoformat()
+    time = datetime.datetime.now(datetime.timezone.utc).isoformat()
 
     # assemble the packet
     dpkt = {
-      "deveui": device.eui,
-      "deviceId": device.id,
+      "deviceUuid": device.id,
       "timestamp": time,
-      "data": data
+      "meterData": data
     }
 
     return dpkt
@@ -76,8 +76,8 @@ class MessageProcessor():
       self.log.exception(e)
       return None
 
-  def decodeData(self, data: str) -> dict:
-    """ this function decodes the data and puts it into a json object """
+  def decodeData(self, data: str) -> str:
+    """ this function decodes the data and puts it into a string """
     # remove base64 coding
     try:
       dataBytes = base64.decodebytes(bytes(data, "utf8"))
@@ -88,22 +88,8 @@ class MessageProcessor():
       return None
 
     self.log.debug("Data bytes: '%s'" % str(dataBytes))
-
-    '''
-    ADD HERE: custom data parsing.
-    '''
-    byte1 = dataBytes[0]
-    byte2 = dataBytes[1]
-    byte3 = dataBytes[2]
-    byte4 = dataBytes[3]
     
-    return {
-      "rawBytes": "".join(format(x, "02x") for x in dataBytes), 
-      "val1": byte1,
-      "val2": byte2,
-      "val3": byte3,
-      "val4": byte4
-    }
+    return "".join(format(x, "02x") for x in dataBytes)
 
 
   def _getValueFromDict(self, keyPath: list, currentObj: dict) -> object:
