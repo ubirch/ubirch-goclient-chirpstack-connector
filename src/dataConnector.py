@@ -43,7 +43,7 @@ class DataConnector():
     """ this function sends measurements to the example api """
     datawhashlist = self.addHashlist(data)
 
-    self.log("Added hashLink to data: %s" % str(datawhashlist))
+    self.log.info("Added hashLink to data: %s" % str(datawhashlist))
 
     status, reason, text = self.http.httpSend(self.url + device.uuid, self.headers, datawhashlist)
 
