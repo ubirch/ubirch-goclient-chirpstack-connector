@@ -12,6 +12,8 @@ import messageProcessor
 import httpSend
 import goClientConnector
 import dataConnector
+import fludiaConnector
+
 
 # get the config and log file path
 CONFIGFILE = os.getenv("UGCC_CONFIG_FILE", "../config.json")
@@ -78,10 +80,16 @@ class Main():
       self.config.dataClientUrl, self.config.dataClientPass, self.http, self.log
     )
 
+    # initialize fludiaConnector
+    self.fludiaConnector = fludiaConnector.FludiaConnector(
+      self.config.fludiaUrl, self.config.fludiaUser, self.config.fludiaPass, self.http, self.log
+    )
+
     # create an array of endpoints
     self.endpoints = [
       ["uBirch go-client", self.goClientConnector.sendData],
-      ["data client", self.dataConnector.sendData]
+      ["data client", self.dataConnector.sendData],
+      ["Fludia API", self.fludiaConnector.sendData]
     ]
 
     # initialise/run the MQTTReceiver (BLOCKING)

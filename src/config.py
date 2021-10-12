@@ -31,6 +31,9 @@ class Config():
     self.goClientUrl: str = None
     self.dataClientUrl: str = None
     self.dataClientPass: str = None
+    self.fludiaUrl : str = None
+    self.fludiaUser : str = None
+    self.fludiaPass : str = None
 
   def readCfg(self) -> bool:
     """Read the configuration"""
@@ -95,6 +98,12 @@ class Config():
       self.log.debug("dataClientUrl => %s" % self.dataClientUrl)
       self.dataClientPass = self._getValueConfigOrEnv(["dataClient", "pass"], "UGCC_DATACLIENT_PASS", default=self.dataClientPass)
       self.log.debug("dataClientPass => len = %d" % len(self.dataClientPass))
+      self.fludiaUrl = self._getValueConfigOrEnv(["fludia", "url"], "UGCC_FLUDIA_URL", default=self.fludiaUrl)
+      self.log.debug("fludiaUrl => %s" % self.fludiaUrl)
+      self.fludiaUser = self._getValueConfigOrEnv(["fludia", "user"], "UGCC_FLUDIA_USER", default=self.fludiaUser)
+      self.log.debug("fludiaUser => %s" % self.fludiaUser)
+      self.fludiaPass = self._getValueConfigOrEnv(["fludia", "pass"], "UGCC_FLUDIA_PASS", default=self.fludiaPass)
+      self.log.debug("fludiaPass => len = %d" % len(self.fludiaPass))
     except:
       return False
 
