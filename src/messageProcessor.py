@@ -60,9 +60,18 @@ class MessageProcessor():
 
     # assemble the packet
     dpkt = {
-      "deviceUuid": device.uuid,
+      "device_properties": {
+        "deveui": device.eui,
+        "devuuid": device.uuid
+      },
       "timestamp": time,
-      "meterData": data
+      "payload_cleartext": data,
+      "type": "uplink",
+      "hashLink": [
+        "device_properties.devuuid",
+        "payload_cleartext",
+        "timestamp"
+      ]
     }
 
     return dpkt

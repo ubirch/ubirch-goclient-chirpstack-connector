@@ -1,5 +1,6 @@
 import logging
 import requests
+import json
 
 import devices
 import httpSend
@@ -21,10 +22,24 @@ class GoClientConnector():
 
       return
 
+    # remove all fields that shouldn't be hashed
+    oldDict = json.loads(str)
+    newDict = {
+      "device_properties": {
+        "devuuid": oldDict["device_properties"]["devuuid"]
+      },
+      "payload_cleartext": oldDict["payload_cleartext"],
+      "timestamp": oldDict["timestamp"]
+    }
+
+    dataStr = json.dumps(newDict, sort_keys=True, indent=None, separators=(",", ":"))
+
+    self.log.info("Sending data to the GoClient: %s" % dataStr)
+
     status, reason, text = self.http.httpSend(
       self.url + device.uuid, 
       {"X-Auth-Token": device.passwd, "Content-Type": "application/json"},
-      data
+      dataStr
     )
 
     # check for success
