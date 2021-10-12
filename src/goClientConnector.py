@@ -23,7 +23,7 @@ class GoClientConnector():
       return
 
     # remove all fields that shouldn't be hashed
-    oldDict = json.loads(str)
+    oldDict = json.loads(data)
     newDict = {
       "device_properties": {
         "devuuid": oldDict["device_properties"]["devuuid"]
