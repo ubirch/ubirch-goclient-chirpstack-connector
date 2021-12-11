@@ -1,17 +1,20 @@
 import logging
 import requests
 import json
+import time
 
 import devices
 import httpSend
 
 
 class GoClientConnector():
-  def __init__(self, url: str, http: httpSend.HttpSend, log: logging.Logger):
+  def __init__(self, url: str, http: httpSend.HttpSend, log: logging.Logger, attempts : int = 3, retryDelay : int = 10):
     """ init function of the GoClientConnector function """
     self.url = url
     self.http = http
     self.log = log
+    self.attempts = attempts
+    self.retryDelay = retryDelay
 
     self.log.info("The go-client URL is '%s'" % self.url)
 
@@ -36,19 +39,48 @@ class GoClientConnector():
 
     self.log.info("Sending data to the GoClient: %s" % dataStr)
 
-    status, reason, text = self.http.httpSend(
-      self.url + device.uuid, 
-      {"X-Auth-Token": device.passwd, "Content-Type": "application/json"},
-      dataStr
-    )
+    
+    #
+    # the GoClient may fail to send UPPs because of a bad connection and then return internal server errors (500)
+    # the http sender wont retry since technically the request has been sent; however this can lead to the data
+    # api getting data for which no anchored UPP exists, which is a problem
+    # therefore on internal server errors there will be retries according to the http retry settings
+    #
+    
+    # set the amount of attempts left
+    attemptsLeft = self.attempts
 
-    # check for success
-    if status == requests.codes.OK:
-      self.log.info("Successfully sent the measurement to the Go-Client")
-    else:
-      if status == -1:
-        self.log.error("Error sending the measurement to the Go-Client")
+    while attemptsLeft > 0:
+      # send it
+      status, reason, text = self.http.httpSend(
+        self.url + device.uuid, 
+        {"X-Auth-Token": device.passwd, "Content-Type": "application/json"},
+        dataStr
+      )
+
+      # decrease the number of attempts left
+      attemptsLeft -= 1
+
+      # check for success
+      if status == requests.codes.OK:
+        self.log.info("Successfully sent the measurement to the Go-Client")
+
+        break
       else:
-        self.log.error("Error sending the measurement to the Go-Client (%d/%s): %s" % (status, reason, text))
+        if status == -1:
+          self.log.error("Error sending the measurement to the Go-Client")
+
+          break
+        elif status == 500:
+          self.log.error("Error sending the measurement to the Go-Client - 500 (trying again %d times)" % attemptsLeft)
+
+          # sleep for the delay
+          time.sleep(self.retryDelay)
+
+          continue
+        else:
+          self.log.error("Error sending the measurement to the Go-Client (%d/%s): %s" % (status, reason, text))
+
+          break
 
     return
