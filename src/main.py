@@ -72,7 +72,8 @@ class Main():
 
     # initialise the go-client connector
     self.goClientConnector = goClientConnector.GoClientConnector(
-      self.config.goClientUrl, self.http, self.log
+      self.config.goClientUrl, self.http, self.log,
+      attempts=self.config.httpAttempts, retryDelay=self.config.httpRetryDelay
     )
 
     # initialize dataConnector
