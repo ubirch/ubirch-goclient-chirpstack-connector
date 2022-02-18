@@ -55,8 +55,8 @@ class MessageProcessor():
 
     self.log.debug("Found a matching device for EUI '%s' with UUID '%s'" % (device.eui, device.uuid))
 
-    # get the time in rfc3339 format
-    time = datetime.datetime.now(datetime.timezone.utc).isoformat(timespec='seconds')
+    # get the time in ISO8601 format
+    time = datetime.datetime.utcnow().isoformat(timespec='seconds') + 'Z'
 
     # assemble the packet
     dpkt = {
